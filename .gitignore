@@ -130,5 +130,7 @@ dmypy.json
 
 # .idea
 .idea
+.vscode/
 
 media/
+static/
