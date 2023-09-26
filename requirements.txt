@@ -15,6 +15,8 @@ decli==0.6.1
 distlib==0.3.6
 Django==4.2.5
 djangorestframework==3.14.0
+drf-spectacular==0.26.5
+drf-spectacular-sidecar==2023.9.1
 drf-standardized-errors==0.12.5
 dulwich==0.21.5
 filelock==3.12.0
@@ -29,6 +31,7 @@ httplib2==0.22.0
 identify==2.5.29
 idna==3.4
 importlib-metadata==6.6.0
+inflection==0.5.1
 installer==0.7.0
 isort==5.12.0
 jaraco.classes==3.2.3
