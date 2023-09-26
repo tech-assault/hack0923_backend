@@ -8,7 +8,7 @@
 
 ### **Стек**
 
-![python version](https://img.shields.io/badge/Python-3.10-green)
+![python version](https://img.shields.io/badge/Python-3.7-green)
 ![django version](https://img.shields.io/badge/Django-2.2-green)
 ![djangorestframework version](https://img.shields.io/badge/DRF-3.12-green)
 
