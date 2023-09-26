@@ -8,7 +8,7 @@
 
 ### **Стек**
 
-![python version](https://img.shields.io/badge/Python-3.7-green)
+![python version](https://img.shields.io/badge/Python-3.10-green)
 ![django version](https://img.shields.io/badge/Django-2.2-green)
 ![djangorestframework version](https://img.shields.io/badge/DRF-3.12-green)
 
@@ -35,20 +35,20 @@ docker-compose up
 Выполнить миграции
 
 ```
-docker-compose exec backend python manage.py migrate       
+docker-compose exec backend python manage.py migrate
 ```
 
 Создать суперпользователя
 
 ```
-docker-compose exec backend python manage.py createsuperuser   
-```    
+docker-compose exec backend python manage.py createsuperuser
+```
 
 Собрать статику
 
-``` 
-docker-compose exec backend python manage.py collectstatic --no-input 
-```   
+```
+docker-compose exec backend python manage.py collectstatic --no-input
+```
 
 
 ### Документация к API доступна по адресу
@@ -61,5 +61,4 @@ docker-compose exec backend python manage.py collectstatic --no-input
 - [Марина Балахонова](https://github.com/margoloko)
 - [Павел Зияев](https://github.com/p0lzi)
 
-___ 
-
+___
