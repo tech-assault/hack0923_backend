@@ -55,6 +55,51 @@ docker-compose exec backend python manage.py collectstatic --no-input
 
 **api/docs/**
 
+### Установка pre-commit hooks
+
+Для того, чтобы при каждом коммите выполнялись pre-commit проверки, необходимо:
+- Установить pre-commit
+- Установить pre-commit hooks
+
+#### Установка pre-commit
+Модуль pre-commit уже добавлен в requirements и должен установиться автоматически с виртуальным окружением.
+
+Проверить установлен ли pre-commit можно командой (при активированном виртуальном окружении):
+```sh
+pre-commit --version
+>> pre-commit 3.3.3
+```
+
+Если этого не произошло, то необходимо установить pre-commit:
+```sh
+pip install pre-commit
+```
+
+#### Установка hooks
+Установка хуков:
+```sh
+pre-commit install --all
+```
+Установка хука для commitizen
+```sh
+pre-commit install --hook-type commit-msg
+```
+В дальнейшем, при выполнении команды git commit будут выполняться проверки, перечисленные в файле .pre-commit-config.yaml.
+
+Если не видно, какая именно ошибка мешает выполнить commit, можно запустить хуки вручную командой:
+```sh
+pre-commit run --all-files
+```
+
+### Работа с commitizen
+Чтобы сгенерировать установленный git-commit, запустите в вашем терминале
+```sh
+cz commit
+```
+или сочетание клавиш
+```sh
+cz c
+```
 
 ## Команда
 
