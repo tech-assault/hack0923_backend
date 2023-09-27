@@ -13,7 +13,7 @@ commitizen==3.10.0
 crashtest==0.4.1
 decli==0.6.1
 distlib==0.3.6
-Django==4.2.5
+Django==4.1
 djangorestframework==3.14.0
 drf-spectacular==0.26.5
 drf-spectacular-sidecar==2023.9.1
