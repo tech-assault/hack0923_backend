@@ -134,3 +134,6 @@ dmypy.json
 
 media/
 static/
+
+# Только в ветке dev
+migrations/
