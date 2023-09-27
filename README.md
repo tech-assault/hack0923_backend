@@ -55,6 +55,19 @@ docker-compose exec backend python manage.py collectstatic --no-input
 
 **api/docs/**
 
+#### Документация API доступна по адресам:
+```sh
+http://127.0.0.1:8000/api/schema/swagger-ui/
+```
+```sh
+http://127.0.0.1:8000/api/schema/redoc/
+```
+#### Админка доступна по адресу:
+
+```sh
+http://127.0.0.1:8000/admin/
+```
+
 ### Установка pre-commit hooks
 
 Для того, чтобы при каждом коммите выполнялись pre-commit проверки, необходимо:
