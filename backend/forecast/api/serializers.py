@@ -1,10 +1,10 @@
 from rest_framework import serializers
 
-from .models import Category, Forecast, Sale, Store
+from sale.models import Category, Forecast, Sale, Store
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    """."""
+    """Сериализатор категории товаров"""
 
     class Meta:
         model = Category
@@ -12,7 +12,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class StoreSerializer(serializers.ModelSerializer):
-    """."""
+    """Сериализатор магазина"""
 
     class Meta:
         model = Store
@@ -20,7 +20,7 @@ class StoreSerializer(serializers.ModelSerializer):
 
 
 class SaleSerializer(serializers.ModelSerializer):
-    """."""
+    """Сериализатор продаж"""
 
     class Meta:
         model = Sale
@@ -28,7 +28,7 @@ class SaleSerializer(serializers.ModelSerializer):
 
 
 class ForecastSerializer(serializers.ModelSerializer):
-    """."""
+    """Сериализатор прогноза"""
 
     class Meta:
         model = Forecast
