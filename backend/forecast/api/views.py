@@ -1,11 +1,11 @@
-from drf_spectacular.utils import (OpenApiParameter, extend_schema,
-                                   extend_schema_view)
+from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from drf_standardized_errors.openapi import AutoSchema
 from rest_framework import filters, mixins, viewsets
-
 from sale.models import Category, Forecast, Sale, Store
+
 from .serializers import (
     CategorySerializer,
+    ForecastDeSerializer,
     ForecastSerializer,
     SaleSerializer,
     StoreSerializer,
@@ -35,8 +35,9 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
 @extend_schema_view(
     list=extend_schema(
         summary="Получить список магазинов",
-        description=("Возвращает список всех магазинов. "
-                     "Можно добавить фильтры по полям."),
+        description=(
+            "Возвращает список всех магазинов. " "Можно добавить фильтры по полям."
+        ),
     ),
     retrieve=extend_schema(
         summary="Получить детали магазина",
@@ -58,10 +59,8 @@ class StoreViewSet(viewsets.ReadOnlyModelViewSet):
         summary="Получить список продаж",
         description="Возвращает список продаж для заданного SKU и ID магазина.",
         parameters=[
-            OpenApiParameter(name="sku", description="SKU товара",
-                             required=True),
-            OpenApiParameter(name="store_id", description="ID магазина",
-                             required=True),
+            OpenApiParameter(name="sku", description="SKU товара", required=True),
+            OpenApiParameter(name="store_id", description="ID магазина", required=True),
         ],
     ),
     retrieve=extend_schema(
@@ -86,19 +85,17 @@ class SaleViewSet(viewsets.ReadOnlyModelViewSet):
 @extend_schema_view(
     list=extend_schema(
         summary="Получить список прогнозов",
-        description=(
-                "Возвращает список прогнозов для заданных SKU и ID магазина."),
+        description=("Возвращает список прогнозов для заданных SKU и ID магазина."),
         parameters=[
-            OpenApiParameter(name="sku", description="SKU товара",
-                             required=True),
-            OpenApiParameter(name="store_id", description="ID магазина",
-                             required=True),
+            OpenApiParameter(name="sku", description="SKU товара", required=True),
+            OpenApiParameter(name="store_id", description="ID магазина", required=True),
         ],
     ),
     create=extend_schema(
         summary="Создать новый прогноз",
-        description=("Принимает спрогнозированные значения для товара и ТЦ,"
-                     " сохраняет в БД"),
+        description=(
+            "Принимает спрогнозированные значения для товара и ТЦ," " сохраняет в БД"
+        ),
         request=ForecastSerializer,
         responses={201: ForecastSerializer},
     ),
@@ -108,7 +105,6 @@ class ForecastViewSet(
 ):
     """Вьюсет для модели Forecast."""
 
-    serializer_class = ForecastSerializer
     schema = AutoSchema()
 
     def get_queryset(self):
@@ -116,3 +112,9 @@ class ForecastViewSet(
         sku = self.request.query_params.get("sku")
         store_id = self.request.query_params.get("store_id")
         return Forecast.objects.filter(pr_sku_id=sku, st_id=store_id)
+
+    def get_serializer_class(self):
+        """Функция определяющая сериализатор в зависимости от метода."""
+        if self.action == "list":
+            return ForecastSerializer
+        return ForecastDeSerializer
