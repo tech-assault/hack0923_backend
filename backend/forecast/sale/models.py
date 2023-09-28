@@ -31,12 +31,11 @@ class Store(models.Model):
     st_division_code = models.CharField('Захэшированное id дивизиона',
                                         max_length=MAX_LENGTH_FOR_FIELDS)
     st_type_format_id = models.PositiveSmallIntegerField(
-        'id формата магазина', max_length=MAX_LENGTH_FOR_FIELDS)
+        'id формата магазина')
     st_type_loc_id = models.PositiveSmallIntegerField(
-        'id тип локации / окружения магазина',
-        max_length=MAX_LENGTH_FOR_FIELDS)
+        'id тип локации / окружения магазина')
     st_type_size_id = models.PositiveSmallIntegerField(
-        'id типа размера магазина', max_length=MAX_LENGTH_FOR_FIELDS)
+        'id типа размера магазина')
     st_is_active = models.BooleanField(
         'флаг активного магазина на данный момент', )
 
@@ -66,6 +65,13 @@ class Sale(models.Model):
         verbose_name = 'Продажа'
         verbose_name_plural = 'Продажи'
 
+        constraints = [
+            models.UniqueConstraint(
+                fields=('st_id', 'pr_sku_id', 'date'),
+                name='unique_st_id_pr_sku_id_date'
+            )
+        ]
+
 
 class Forecast(models.Model):
     """Модель прогнозов продаж."""
@@ -80,3 +86,10 @@ class Forecast(models.Model):
     class Meta:
         verbose_name = 'Прогноз'
         verbose_name_plural = 'Прогнозы'
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=('st_id', 'pr_sku_id', 'date'),
+                name='unique_st_id_pr_sku_id_date'
+            )
+        ]

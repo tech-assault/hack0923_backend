@@ -115,4 +115,4 @@ class ForecastViewSet(
         """Возвращает набор данных прогнозов для заданных SKU и ID магазина."""
         sku = self.request.query_params.get("sku")
         store_id = self.request.query_params.get("store_id")
-        return Forecast.objects.filter(sku=sku, store_id=store_id)
+        return Forecast.objects.filter(pr_sku_id=sku, st_id=store_id)

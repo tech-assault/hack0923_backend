@@ -35,6 +35,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'api.apps.ApiConfig',
+    'sale.apps.SaleConfig',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -79,7 +82,7 @@ DATABASES = {
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', default="postgres"),
         'HOST': os.getenv('DB_HOST', default="localhost"),
         'PORT': os.getenv('DB_PORT', default="5432"),
-    } if not os.getenv('USE_SQLITE', default='True') == 'True' else {
+    } if not DEBUG else {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
@@ -123,6 +126,11 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+REST_FRAMEWORK = {
+    # ВАШИ НАСТРОЙКИ
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
 
 
 MAX_LENGTH_FOR_FIELDS = 32
