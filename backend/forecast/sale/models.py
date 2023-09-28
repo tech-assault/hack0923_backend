@@ -5,21 +5,14 @@ from forecast.settings import MAX_LENGTH_FOR_FIELDS
 class Category(models.Model):
     """Модель категорий товаров."""
 
-    sku = models.CharField(
-        "Захэшированное id товара", primary_key=True, max_length=MAX_LENGTH_FOR_FIELDS
-    )
-    group = models.CharField(
-        "Захэшированная группа товара", max_length=MAX_LENGTH_FOR_FIELDS
-    )
-    category = models.CharField(
-        "Захэшированная категория товара", max_length=MAX_LENGTH_FOR_FIELDS
-    )
-    subcategory = models.CharField(
-        "Захэшированная подкатегория товара", max_length=MAX_LENGTH_FOR_FIELDS
-    )
+    sku = models.CharField("Единица складского учета", primary_key=True,
+                           max_length=MAX_LENGTH_FOR_FIELDS)
+    group = models.CharField("Группа", max_length=MAX_LENGTH_FOR_FIELDS)
+    category = models.CharField("Категория", max_length=MAX_LENGTH_FOR_FIELDS)
+    subcategory = models.CharField("Подкатегория",
+                                   max_length=MAX_LENGTH_FOR_FIELDS)
     uom = models.PositiveSmallIntegerField(
-        "Маркер, обозначающий продаётся товар на вес или в ШТ"
-    )
+        "Маркер, обозначающий продаётся товар на вес или в ШТ")
 
     class Meta:
         verbose_name = "Категория"
@@ -29,21 +22,14 @@ class Category(models.Model):
 class Store(models.Model):
     """Модель магазинов."""
 
-    store = models.CharField(
-        "Захэшированное id магазина", primary_key=True, max_length=MAX_LENGTH_FOR_FIELDS
-    )
-    city = models.CharField(
-        "Захэшированное id города", max_length=MAX_LENGTH_FOR_FIELDS
-    )
-    division = models.CharField(
-        "Захэшированное id дивизиона", max_length=MAX_LENGTH_FOR_FIELDS
-    )
-    type_format = models.PositiveSmallIntegerField("id формата магазина")
-    loc = models.PositiveSmallIntegerField("id тип локации / окружения магазина")
-    size = models.PositiveSmallIntegerField("id типа размера магазина")
-    is_active = models.BooleanField(
-        "Флаг активного магазина на данный момент",
-    )
+    store = models.CharField("Название", primary_key=True,
+                             max_length=MAX_LENGTH_FOR_FIELDS)
+    city = models.CharField("Город", max_length=MAX_LENGTH_FOR_FIELDS)
+    division = models.CharField("Дивизион", max_length=MAX_LENGTH_FOR_FIELDS)
+    type_format = models.PositiveSmallIntegerField("Формат")
+    loc = models.PositiveSmallIntegerField("Тип локации")
+    size = models.PositiveSmallIntegerField("Тип размера")
+    is_active = models.BooleanField("Флаг активного магазина на данный момент")
 
     class Meta:
         verbose_name = "Магазин"
@@ -54,11 +40,11 @@ class Sale(models.Model):
     """Модель продаж."""
 
     store = models.ForeignKey(
-        Store, on_delete=models.CASCADE, verbose_name="Захэшированное id магазина"
+        Store, on_delete=models.CASCADE, verbose_name="Название магазина"
     )
     sku = models.ForeignKey(
-        Category, on_delete=models.CASCADE, verbose_name="Захэшированное id товара"
-    )
+        Category, on_delete=models.CASCADE,
+        verbose_name="Единица складского учета")
     date = models.DateField("Дата")
     sales_type = models.BooleanField("Флаг наличия промо")
     sales_units = models.PositiveIntegerField(
@@ -79,10 +65,11 @@ class Forecast(models.Model):
     """Модель прогнозов продаж."""
 
     store = models.ForeignKey(
-        Store, on_delete=models.CASCADE, verbose_name="Захэшированное id магазина"
+        Store, on_delete=models.CASCADE, verbose_name="Название магазина"
     )
     sku = models.ForeignKey(
-        Category, on_delete=models.CASCADE, verbose_name="Захэшированное id товара"
+        Category, on_delete=models.CASCADE,
+        verbose_name="Единица складского учета"
     )
     forecast_date = models.DateField("Дата")
     sales_units_forecasted = models.PositiveIntegerField("Спрос в ШТ")
@@ -90,3 +77,5 @@ class Forecast(models.Model):
     class Meta:
         verbose_name = "Прогноз"
         verbose_name_plural = "Прогнозы"
+
+
