@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "drf_standardized_errors",
     "drf_spectacular",
     "drf_spectacular_sidecar",
+    "sales.apps.SalesConfig",
 ]
 
 MIDDLEWARE = [
@@ -108,8 +109,9 @@ REST_FRAMEWORK = {
 }
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "Your Project API",
-    "DESCRIPTION": "Your project description",
+    "TITLE": "LentaTimeSeries API",
+    "DESCRIPTION": "API для прогнозирования спроса для товаров собственного производства"
+    "с ежедневным обновлением. Он позволяет создавать, просматривать прогнозы.",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
     "SWAGGER_UI_DIST": "SIDECAR",
