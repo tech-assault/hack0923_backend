@@ -1,10 +1,10 @@
-from django_filters import rest_framework
+from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from drf_standardized_errors.openapi import AutoSchema
 from rest_framework import filters, mixins, viewsets
 from sale.models import Category, Forecast, Sale, Store
 
-from .filters import ForecastFilter
+from .filters import ForecastFilter, StoreFilter
 from .serializers import (
     CategorySerializer,
     ForecastDeSerializer,
@@ -52,6 +52,8 @@ class StoreViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Store.objects.all()
     serializer_class = StoreSerializer
     filter_backends = [filters.SearchFilter]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = StoreFilter
     search_fields = ["type_format", "loc", "city", "division"]
 
 
@@ -113,7 +115,7 @@ class ForecastViewSet(
     """
 
     schema = AutoSchema()
-    filter_backends = [rest_framework.DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend]
     filterset_class = ForecastFilter
 
     def get_queryset(self):
