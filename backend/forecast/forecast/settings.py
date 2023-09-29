@@ -35,11 +35,12 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "api.apps.ApiConfig",
     "sale.apps.SaleConfig",
+    "api.apps.ApiConfig",
     "drf_standardized_errors",
     "drf_spectacular",
     "drf_spectacular_sidecar",
+    "django_filters",
 ]
 
 MIDDLEWARE = [
