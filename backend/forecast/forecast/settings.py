@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "drf_standardized_errors",
     "drf_spectacular",
     "drf_spectacular_sidecar",
+    "import_export"
 ]
 
 MIDDLEWARE = [
