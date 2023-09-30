@@ -1,8 +1,10 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from drf_standardized_errors.openapi import AutoSchema
 from rest_framework import filters, mixins, viewsets
 from sale.models import Category, Forecast, Sale, Store
 
+from .filters import ForecastFilter, StoreFilter
 from .serializers import (
     CategorySerializer,
     ForecastDeSerializer,
@@ -50,6 +52,8 @@ class StoreViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Store.objects.all()
     serializer_class = StoreSerializer
     filter_backends = [filters.SearchFilter]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = StoreFilter
     search_fields = ["type_format", "loc", "city", "division"]
 
 
@@ -103,9 +107,16 @@ class SaleViewSet(viewsets.ReadOnlyModelViewSet):
 class ForecastViewSet(
     mixins.CreateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet
 ):
-    """Вьюсет для модели Forecast."""
+    """
+    Вьюсет для модели Forecast.
+
+    Позволяет создавать и просматривать прогнозы.
+    Поддерживает фильтрацию прогнозов по SKU, ID магазина и дате.
+    """
 
     schema = AutoSchema()
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ForecastFilter
 
     def get_queryset(self):
         """Возвращает набор данных прогнозов для заданных SKU и ID магазина."""
