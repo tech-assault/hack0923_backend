@@ -1,6 +1,8 @@
 from django.contrib import admin
 
 from import_export.admin import ImportExportModelAdmin
+from import_export_celery.admin_actions import create_export_job_action
+from import_export_celery.admin import ImportJobAdmin
 
 from .models import Category, Forecast, Sale, Store
 from .resource import CategoryResource, StoreResource, SaleResource
@@ -35,5 +37,9 @@ class SaleAdmin(ImportExportModelAdmin):
 @admin.register(Forecast)
 class ForecastAdmin(admin.ModelAdmin):
     """Административная панель для модели Forecast."""
+
+    actions = (
+        create_export_job_action,
+    )
 
     list_display = ("store", "forecast_date", "sku", "sales_units_forecasted")

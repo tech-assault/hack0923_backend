@@ -24,7 +24,7 @@ SECRET_KEY = "django-insecure-g4$(@)6^!+t1nk8*byfvp_@f0e&*&d)b=w$5-lqht0qs!#2i4t
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -35,12 +35,14 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "api.apps.ApiConfig",
-    "sale.apps.SaleConfig",
     "drf_standardized_errors",
     "drf_spectacular",
     "drf_spectacular_sidecar",
-    "import_export"
+    "sale.apps.SaleConfig",
+    "import_export",
+    "import_export_celery",
+    "api.apps.ApiConfig",
+
 ]
 
 MIDDLEWARE = [
@@ -51,14 +53,17 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "author.middlewares.AuthorDefaultBackendMiddleware"
 ]
 
 ROOT_URLCONF = "forecast.urls"
 
+TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [TEMPLATES_DIR],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -78,7 +83,8 @@ WSGI_APPLICATION = "forecast.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": os.getenv("DB_ENGINE", default="django.db.backends.postgresql"),
+        "ENGINE": os.getenv("DB_ENGINE",
+                            default="django.db.backends.postgresql"),
         "NAME": os.getenv("DB_NAME", default="postgres"),
         "USER": os.getenv("POSTGRES_USER", default="postgres"),
         "PASSWORD": os.getenv("POSTGRES_PASSWORD", default="postgres"),
@@ -96,26 +102,22 @@ DATABASES = {
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
+    {"NAME": ("django.contrib.auth.password_validation"
+              ".UserAttributeSimilarityValidator")},
+    {"NAME": ("django.contrib.auth.password_validation"
+              ".MinimumLengthValidator")},
+    {"NAME": ("django.contrib.auth.password_validation"
+              ".CommonPasswordValidator")},
+    {"NAME": ("django.contrib.auth.password_validation"
+              ".NumericPasswordValidator")},
 ]
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "ru"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Europe/Moscow"
 
 USE_I18N = True
 
@@ -125,6 +127,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "static/"
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, MEDIA_URL)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -139,12 +143,47 @@ REST_FRAMEWORK = {
 SPECTACULAR_SETTINGS = {
     "TITLE": "LentaTimeSeries API",
     "DESCRIPTION": "API для прогнозирования спроса для товаров собственного производства"
-    "с ежедневным обновлением. Он позволяет создавать, просматривать прогнозы.",
+                   "с ежедневным обновлением. Он позволяет создавать, просматривать прогнозы.",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
     "SWAGGER_UI_DIST": "SIDECAR",
     "SWAGGER_UI_FAVICON_HREF": "SIDECAR",
     "REDOC_DIST": "SIDECAR",
 }
+
+IMPORT_EXPORT_CELERY_INIT_MODULE = "forecast.celery"
+
+
+# def get_sale_resource():
+#     # from sale.resource import SaleResource
+#     # return SaleResource
+
+
+IMPORT_EXPORT_CELERY_MODELS = {
+    "Sale": {
+        'app_label': 'sale',
+        'model_name': 'Sale',
+        # 'resource': get_sale_resource,  # Optional
+    }
+}
+
+# IMPORT_EXPORT_CELERY_MODELS = {
+#     "Sale": {
+#         'app_label': 'sale',
+#         'model_name': 'Sale'
+#     }
+# }
+
+BROKER_URL = os.environ.get("REDIS_URL", "redis://localhost:6379")
+CELERY_RESULT_BACKEND = "redis://localhost:6379"
+CELERY_ACCEPT_CONTENT = ["application/json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = TIME_ZONE
+
+REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379")
+
+
+IMPORT_EXPORT_CELERY_STORAGE = "django.core.files.storage.FileSystemStorage"
 
 MAX_LENGTH_FOR_FIELDS = 32
