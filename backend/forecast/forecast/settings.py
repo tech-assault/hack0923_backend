@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "drf_spectacular_sidecar",
     "django_filters",
+    "import_export",
 ]
 
 MIDDLEWARE = [
@@ -78,7 +79,8 @@ WSGI_APPLICATION = "forecast.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": os.getenv("DB_ENGINE", default="django.db.backends.postgresql"),
+        "ENGINE": os.getenv("DB_ENGINE",
+                            default="django.db.backends.postgresql"),
         "NAME": os.getenv("DB_NAME", default="postgres"),
         "USER": os.getenv("POSTGRES_USER", default="postgres"),
         "PASSWORD": os.getenv("POSTGRES_PASSWORD", default="postgres"),
@@ -96,26 +98,22 @@ DATABASES = {
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
+    {"NAME": ("django.contrib.auth.password_validation"
+              ".UserAttributeSimilarityValidator")},
+    {"NAME": ("django.contrib.auth.password_validation"
+              ".MinimumLengthValidator")},
+    {"NAME": ("django.contrib.auth.password_validation"
+              ".CommonPasswordValidator")},
+    {"NAME": ("django.contrib.auth.password_validation"
+              ".NumericPasswordValidator")},
 ]
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "ru"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Europe/Moscow"
 
 USE_I18N = True
 
@@ -139,7 +137,7 @@ REST_FRAMEWORK = {
 SPECTACULAR_SETTINGS = {
     "TITLE": "LentaTimeSeries API",
     "DESCRIPTION": "API для прогнозирования спроса для товаров собственного производства"
-    "с ежедневным обновлением. Он позволяет создавать, просматривать прогнозы.",
+                   "с ежедневным обновлением. Он позволяет создавать, просматривать прогнозы.",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
     "SWAGGER_UI_DIST": "SIDECAR",

@@ -1,5 +1,12 @@
+from decimal import Decimal
+
+from django.core.validators import MinValueValidator
 from django.db import models
 from forecast.settings import MAX_LENGTH_FOR_FIELDS
+
+DECIMAL_VALIDATION = [MinValueValidator(Decimal('0.1'))]
+MAX_DIGITS = 15
+DECIMAL_PLACES = 1
 
 
 class Category(models.Model):
@@ -18,6 +25,10 @@ class Category(models.Model):
         verbose_name = "Категория"
         verbose_name_plural = "Категории"
 
+    def __str__(self):
+        return self.sku
+
+
 
 class Store(models.Model):
     """Модель магазинов."""
@@ -35,6 +46,9 @@ class Store(models.Model):
         verbose_name = "Магазин"
         verbose_name_plural = "Магазины"
 
+    def __str__(self):
+        return self.store
+
 
 class Sale(models.Model):
     """Модель продаж."""
@@ -47,18 +61,25 @@ class Sale(models.Model):
         verbose_name="Единица складского учета")
     date = models.DateField("Дата")
     sales_type = models.BooleanField("Флаг наличия промо")
-    sales_units = models.PositiveIntegerField(
-        "Число проданных товаров без признака промо"
-    )
-    sales_units_promo = models.PositiveIntegerField(
-        "Число проданных товаров с признаком промо"
-    )
-    sales_rub = models.FloatField("Продажи без признака промо в РУБ")
-    sales_run_promo = models.FloatField("Продажи с признаком промо в РУБ")
+    sales_units = models.DecimalField(
+        "Число проданных товаров без признака промо", max_digits=MAX_DIGITS,
+        decimal_places=DECIMAL_PLACES, validators=DECIMAL_VALIDATION)
+    sales_units_promo = models.DecimalField(
+        "Число проданных товаров с признаком промо", max_digits=MAX_DIGITS,
+        decimal_places=DECIMAL_PLACES, validators=DECIMAL_VALIDATION)
+    sales_rub = models.DecimalField(
+        "Продажи без признака промо в РУБ", max_digits=MAX_DIGITS,
+        decimal_places=DECIMAL_PLACES, validators=DECIMAL_VALIDATION)
+    sales_run_promo = models.DecimalField(
+        "Продажи с признаком промо в РУБ", max_digits=MAX_DIGITS,
+        decimal_places=DECIMAL_PLACES, validators=DECIMAL_VALIDATION)
 
     class Meta:
         verbose_name = "Продажа"
         verbose_name_plural = "Продажи"
+
+    def __str__(self):
+        return f'{self.store} {self.sku} {self.date}'
 
 
 class Forecast(models.Model):
@@ -77,5 +98,3 @@ class Forecast(models.Model):
     class Meta:
         verbose_name = "Прогноз"
         verbose_name_plural = "Прогнозы"
-
-
