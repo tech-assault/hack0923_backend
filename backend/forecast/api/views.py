@@ -4,7 +4,7 @@ from drf_standardized_errors.openapi import AutoSchema
 from rest_framework import filters, mixins, viewsets
 from sale.models import Category, Forecast, Sale, Store
 
-from .filters import ForecastFilter, StoreFilter
+from .filters import CategoryFilter, ForecastFilter, StoreFilter
 from .serializers import (
     CategorySerializer,
     ForecastDeSerializer,
@@ -31,6 +31,8 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     schema = AutoSchema()
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = CategoryFilter
 
 
 @extend_schema(tags=["Магазины"])
