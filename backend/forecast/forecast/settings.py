@@ -40,7 +40,6 @@ INSTALLED_APPS = [
     "drf_spectacular_sidecar",
     "sale.apps.SaleConfig",
     "import_export",
-    "import_export_celery",
     "api.apps.ApiConfig",
 
 ]
@@ -150,40 +149,5 @@ SPECTACULAR_SETTINGS = {
     "SWAGGER_UI_FAVICON_HREF": "SIDECAR",
     "REDOC_DIST": "SIDECAR",
 }
-
-IMPORT_EXPORT_CELERY_INIT_MODULE = "forecast.celery"
-
-
-# def get_sale_resource():
-#     # from sale.resource import SaleResource
-#     # return SaleResource
-
-
-IMPORT_EXPORT_CELERY_MODELS = {
-    "Sale": {
-        'app_label': 'sale',
-        'model_name': 'Sale',
-        # 'resource': get_sale_resource,  # Optional
-    }
-}
-
-# IMPORT_EXPORT_CELERY_MODELS = {
-#     "Sale": {
-#         'app_label': 'sale',
-#         'model_name': 'Sale'
-#     }
-# }
-
-BROKER_URL = os.environ.get("REDIS_URL", "redis://localhost:6379")
-CELERY_RESULT_BACKEND = "redis://localhost:6379"
-CELERY_ACCEPT_CONTENT = ["application/json"]
-CELERY_TASK_SERIALIZER = "json"
-CELERY_RESULT_SERIALIZER = "json"
-CELERY_TIMEZONE = TIME_ZONE
-
-REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379")
-
-
-IMPORT_EXPORT_CELERY_STORAGE = "django.core.files.storage.FileSystemStorage"
 
 MAX_LENGTH_FOR_FIELDS = 32
