@@ -23,6 +23,7 @@ class SaleResource(resources.ModelResource):
     sku = fields.Field(
         attribute='sku', column_name='pr_sku_id',
         widget=widgets.ForeignKeyWidget(Category, field='sku'))
+
     sales_type = fields.Field(attribute='sales_type',
                               column_name='pr_sales_type_id')
     sales_units = fields.Field(attribute='sales_units',

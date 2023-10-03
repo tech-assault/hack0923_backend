@@ -29,7 +29,6 @@ class Category(models.Model):
         return self.sku
 
 
-
 class Store(models.Model):
     """Модель магазинов."""
 
@@ -59,6 +58,26 @@ class Sale(models.Model):
     sku = models.ForeignKey(
         Category, on_delete=models.CASCADE,
         verbose_name="Единица складского учета")
+
+    class Meta:
+        verbose_name = "Продажа"
+        verbose_name_plural = "Продажи"
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=('store', 'sku'),
+                name='unique_store_sku_in_sale'
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.store} {self.sku}'
+
+
+class SaleOfSKUInStore(models.Model):
+    sale = models.ForeignKey(Sale, on_delete=models.CASCADE,
+                             verbose_name='Товар магазина',
+                             related_name='fact')
     date = models.DateField("Дата")
     sales_type = models.BooleanField("Флаг наличия промо")
     sales_units = models.DecimalField(
@@ -74,12 +93,7 @@ class Sale(models.Model):
         "Продажи с признаком промо в РУБ", max_digits=MAX_DIGITS,
         decimal_places=DECIMAL_PLACES, validators=DECIMAL_VALIDATION)
 
-    class Meta:
-        verbose_name = "Продажа"
-        verbose_name_plural = "Продажи"
 
-    def __str__(self):
-        return f'{self.store} {self.sku} {self.date}'
 
 
 class Forecast(models.Model):
@@ -92,9 +106,23 @@ class Forecast(models.Model):
         Category, on_delete=models.CASCADE,
         verbose_name="Единица складского учета"
     )
-    forecast_date = models.DateField("Дата")
-    sales_units_forecasted = models.PositiveIntegerField("Спрос в ШТ")
+    forecast_date = models.DateField("Дата расчета прогноза")
 
     class Meta:
         verbose_name = "Прогноз"
         verbose_name_plural = "Прогнозы"
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=('store', 'sku'),
+                name='unique_store_sku_in_forecast'
+            )
+        ]
+
+
+class DayForecast(models.Model):
+    store_sku_id = models.ForeignKey(Forecast, on_delete=models.CASCADE,
+                                     verbose_name='Товар магазина',
+                                     related_name='forecast')
+    date = models.DateField("Дата")
+    sales_units_forecasted = models.PositiveIntegerField("Спрос в ШТ")
