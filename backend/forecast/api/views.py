@@ -2,7 +2,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from drf_standardized_errors.openapi import AutoSchema
 from rest_framework import filters, mixins, viewsets
-from sale.models import Category, Forecast, Sale, Store
+from sales.models import Category, Forecast, Sale, Store
 
 from .filters import CategoryFilter, ForecastFilter, StoreFilter
 from .serializers import (
