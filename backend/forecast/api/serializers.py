@@ -43,7 +43,6 @@ class SaleSerializer(serializers.ModelSerializer):
 
 class ForecastSerializer(serializers.ModelSerializer):
     """Сериализатор прогноза."""
-
     store = serializers.SlugRelatedField(
         slug_field="store", queryset=Store.objects.all()
     )
@@ -53,8 +52,15 @@ class ForecastSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Forecast
-        fields = ("store", "forecast_date", "sku", "sales_units_forecasted")
+        fields = ("store", "forecast_date", "sku", )
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        forecast = {
+            str(instance.forecast_date): instance.sales_units_forecasted
+        }
+        representation['forecast'] = forecast
+        return representation
 
 class CategoryDeSerializer(serializers.ModelSerializer):
     """
@@ -155,3 +161,9 @@ class ForecastDeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Forecast
         fields = ("store", "forecast_date", "sku", "sales_units_forecasted")
+
+    def to_representation(self, instance):
+        """Сериализует прогнозы в виде словаря."""
+        representation = super().to_representation(instance)
+        representation["forecast"] = instance.forecast
+        return representation

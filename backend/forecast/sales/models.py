@@ -89,6 +89,7 @@ class Forecast(models.Model):
     )
     forecast_date = models.DateField("Дата")
     sales_units_forecasted = models.PositiveIntegerField("Спрос в ШТ")
+    
 
     class Meta:
         verbose_name = "Прогноз"
