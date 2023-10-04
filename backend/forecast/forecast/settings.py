@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "api.apps.UsersConfig",
     "sales.apps.SalesConfig",
     "api.apps.ApiConfig",
     "drf_standardized_errors",
