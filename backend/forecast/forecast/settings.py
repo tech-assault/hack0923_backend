@@ -35,7 +35,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "api.apps.UsersConfig",
+    "users.apps.UsersConfig",
     "sales.apps.SalesConfig",
     "api.apps.ApiConfig",
     "drf_standardized_errors",
@@ -111,6 +111,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = "users.User"
+
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
