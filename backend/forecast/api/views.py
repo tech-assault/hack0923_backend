@@ -1,4 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from drf_standardized_errors.openapi import AutoSchema
 from rest_framework import filters, mixins, viewsets
@@ -30,6 +31,7 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = [IsAuthenticated]
     schema = AutoSchema()
     filter_backends = [DjangoFilterBackend]
     filterset_class = CategoryFilter
@@ -51,12 +53,18 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
 class StoreViewSet(viewsets.ReadOnlyModelViewSet):
     """Вьюсет для модели Store."""
 
-    queryset = Store.objects.all()
     serializer_class = StoreSerializer
+    permission_classes = [IsAuthenticated]
     filter_backends = [filters.SearchFilter]
     filter_backends = [DjangoFilterBackend]
     filterset_class = StoreFilter
     search_fields = ["type_format", "loc", "city", "division"]
+
+    def get_queryset(self):
+        user = self.request.user
+        stores = user.stores.all()        
+        queryset = Store.objects.filter(id__in=stores)
+        return queryset
 
 
 @extend_schema(tags=["Sale"])
@@ -78,13 +86,16 @@ class SaleViewSet(viewsets.ReadOnlyModelViewSet):
     """Вьюсет для модели Sale."""
 
     serializer_class = SaleSerializer
+    permission_classes = [IsAuthenticated]
     schema = AutoSchema()
 
     def get_queryset(self):
         """Возвращает набор данных продаж для заданного SKU и ID магазина."""
+        user = self.request.user
         sku = self.request.query_params.get("sku")
         store_id = self.request.query_params.get("store_id")
-        return Sale.objects.filter(sku=sku, store_id=store_id)
+        queryset = Sale.objects.filter(sku=sku, store_id=store_id, store__in=user.stores.all())
+        return queryset
 
 
 @extend_schema(tags=["Прогнозы"])
@@ -119,12 +130,14 @@ class ForecastViewSet(
     schema = AutoSchema()
     filter_backends = [DjangoFilterBackend]
     filterset_class = ForecastFilter
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         """Возвращает набор данных прогнозов для заданных SKU и ID магазина."""
+        user = self.request.user
         sku = self.request.query_params.get("sku")
         store_id = self.request.query_params.get("store_id")
-        return Forecast.objects.filter(pr_sku_id=sku, st_id=store_id)
+        return Forecast.objects.filter(sku=sku, store=store_id, store__in=user.stores.all())
 
     def get_serializer_class(self):
         """Функция определяющая сериализатор в зависимости от метода."""

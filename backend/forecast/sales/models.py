@@ -1,6 +1,8 @@
 from django.db import models
 from forecast.settings import MAX_LENGTH_FOR_FIELDS
 
+from users.models import User
+
 
 class Category(models.Model):
     """Модель категорий товаров."""
@@ -32,6 +34,7 @@ class Store(models.Model):
     store = models.CharField(
         "Захэшированное id магазина", primary_key=True, max_length=MAX_LENGTH_FOR_FIELDS
     )
+    users = models.ManyToManyField(User, related_name='stores')
     city = models.CharField(
         "Захэшированное id города", max_length=MAX_LENGTH_FOR_FIELDS
     )
@@ -55,7 +58,7 @@ class Sale(models.Model):
 
     store = models.ForeignKey(
         Store, on_delete=models.CASCADE, verbose_name="Захэшированное id магазина"
-    )
+    )    
     sku = models.ForeignKey(
         Category, on_delete=models.CASCADE, verbose_name="Захэшированное id товара"
     )
