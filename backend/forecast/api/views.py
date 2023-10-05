@@ -110,7 +110,7 @@ class SaleViewSet(viewsets.ReadOnlyModelViewSet):
         parameters=[
             OpenApiParameter(name="sku", description="SKU товара",
                              required=True),
-            OpenApiParameter(name="store_id", description="ID магазина",
+            OpenApiParameter(name="store", description="ID магазина",
                              required=True),
         ],
     ),
@@ -140,8 +140,8 @@ class ForecastViewSet(
     def get_queryset(self):
         """Возвращает набор данных прогнозов для заданных SKU и ID магазина."""
         sku = self.request.query_params.get("sku")
-        store_id = self.request.query_params.get("store_id")
-        return Forecast.objects.filter(pr_sku_id=sku, st_id=store_id)
+        store = self.request.query_params.get("store")
+        return Forecast.objects.filter(sku_id=sku, store_id=store)
 
     def get_serializer_class(self):
         """Функция определяющая сериализатор в зависимости от метода."""

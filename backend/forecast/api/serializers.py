@@ -162,5 +162,3 @@ class ForecastDeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Forecast
         fields = ("store", "forecast_date", "sku", "sales_units_forecasted")
-
-
