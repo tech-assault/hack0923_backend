@@ -1,8 +1,8 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import OpenApiParameter, extend_schema, \
-    extend_schema_view, inline_serializer, OpenApiResponse
+from drf_spectacular.utils import (OpenApiParameter, extend_schema,
+                                   extend_schema_view)
 from drf_standardized_errors.openapi import AutoSchema
-from rest_framework import filters, mixins, viewsets, status
+from rest_framework import filters, mixins, viewsets
 from rest_framework.response import Response
 
 from sale.models import Category, Forecast, Sale, Store
@@ -131,7 +131,9 @@ class ForecastViewSet(
 
     Позволяет создавать и просматривать прогнозы.
     Поддерживает фильтрацию прогнозов по SKU, ID магазина и дате.
+
     """
+    renderer_class = CustomRenderer
 
     schema = AutoSchema()
     filter_backends = [DjangoFilterBackend]

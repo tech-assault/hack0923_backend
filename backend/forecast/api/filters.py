@@ -1,5 +1,5 @@
 from django_filters import rest_framework as filters
-from sales.models import Category, Forecast, Store
+from sale.models import Category, Forecast, Store
 
 
 class ForecastFilter(filters.FilterSet):

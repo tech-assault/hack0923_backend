@@ -58,9 +58,10 @@ class ForecastSerializer(serializers.ModelSerializer):
         fields = ("store", "sku", "forecast_date", "forecast")
 
     def to_representation(self, instance):
-        instance.forecast = {obj['date']: obj['units']
-                             for obj in instance.forecast}
-        return instance
+        forecast = super().to_representation(instance)
+        forecast['forecast'] = {day_forecast['date']: day_forecast['units']
+                                for day_forecast in forecast['forecast']}
+        return forecast
 
 
 class CategoryDeSerializer(serializers.ModelSerializer):
