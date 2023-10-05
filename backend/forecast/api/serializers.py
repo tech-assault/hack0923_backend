@@ -13,6 +13,8 @@ class CategorySerializer(serializers.ModelSerializer):
 class StoreSerializer(serializers.ModelSerializer):
     """Сериализатор магазина."""
 
+    is_active = serializers.IntegerField(read_only=True)
+
     class Meta:
         model = Store
         fields = (
@@ -24,6 +26,11 @@ class StoreSerializer(serializers.ModelSerializer):
             "size",
             "is_active",
         )
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['is_active'] = int(instance.is_active)  # Преобразовываем bool в int
+        return representation
 
 
 class SaleSerializer(serializers.ModelSerializer):
@@ -41,26 +48,6 @@ class SaleSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class ForecastSerializer(serializers.ModelSerializer):
-    """Сериализатор прогноза."""
-    store = serializers.SlugRelatedField(
-        slug_field="store", queryset=Store.objects.all()
-    )
-    sku = serializers.SlugRelatedField(
-        slug_field="sku", queryset=Category.objects.all()
-    )
-
-    class Meta:
-        model = Forecast
-        fields = ("store", "forecast_date", "sku", )
-
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        forecast = {
-            str(instance.forecast_date): instance.sales_units_forecasted
-        }
-        representation['forecast'] = forecast
-        return representation
 
 class CategoryDeSerializer(serializers.ModelSerializer):
     """
@@ -141,6 +128,9 @@ class SaleDeSerializer(serializers.ModelSerializer):
             "sales_run_promo",
         )
 
+class SalesUnitsSerializer(serializers.Serializer):
+    date = serializers.DateField()
+    sales_units = serializers.IntegerField()
 
 class ForecastDeSerializer(serializers.ModelSerializer):
     """
@@ -162,8 +152,24 @@ class ForecastDeSerializer(serializers.ModelSerializer):
         model = Forecast
         fields = ("store", "forecast_date", "sku", "sales_units_forecasted")
 
+    
+class ForecastSerializer(serializers.ModelSerializer):
+    """Сериализатор прогноза."""
+    store = serializers.SlugRelatedField(
+        slug_field="store", queryset=Store.objects.all()
+    )
+    sku = serializers.SlugRelatedField(
+        slug_field="sku", queryset=Category.objects.all()
+    )
+
+    class Meta:
+        model = Forecast
+        fields = ("store", "forecast_date", "sku", )
+
     def to_representation(self, instance):
-        """Сериализует прогнозы в виде словаря."""
         representation = super().to_representation(instance)
-        representation["forecast"] = instance.forecast
+        forecast_data = {
+            str(instance.forecast_date): instance.sales_units_forecasted
+        }
+        representation['forecast'] = forecast_data
         return representation
