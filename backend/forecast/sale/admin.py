@@ -9,7 +9,6 @@ from import_export.admin import ImportExportModelAdmin
 
 from .models import Category, Forecast, Sale, Store, SaleOfSKUInStore
 from .resources import CategoryResource, StoreResource, SaleResource
-from .utils import ImportUtils
 
 
 class CsvImportForm(forms.Form):
