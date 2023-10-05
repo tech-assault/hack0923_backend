@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from sale.models import Category, Forecast, Sale, Store
+from sale.models import Category, Forecast, Sale, Store, DayForecast
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -30,16 +30,16 @@ class StoreSerializer(serializers.ModelSerializer):
 class SaleSerializer(serializers.ModelSerializer):
     """Сериализатор продаж."""
 
-    store = serializers.SlugRelatedField(
-        slug_field="store", queryset=Store.objects.all()
-    )
-    sku = serializers.SlugRelatedField(
-        slug_field="sku", queryset=Category.objects.all()
-    )
-
     class Meta:
         model = Sale
-        fields = "__all__"
+        exclude = ('id', 'store', 'sku')
+
+
+class DayForecastSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = DayForecast
+        fields = ('date', 'units')
 
 
 class ForecastSerializer(serializers.ModelSerializer):
@@ -51,10 +51,16 @@ class ForecastSerializer(serializers.ModelSerializer):
     sku = serializers.SlugRelatedField(
         slug_field="sku", queryset=Category.objects.all()
     )
+    forecast = DayForecastSerializer(many=True)
 
     class Meta:
         model = Forecast
-        fields = ("store", "forecast_date", "sku", "sales_units_forecasted")
+        fields = ("store", "sku", "forecast_date", "forecast")
+
+    def to_representation(self, instance):
+        instance.forecast = {obj['date']: obj['units']
+                             for obj in instance.forecast}
+        return instance
 
 
 class CategoryDeSerializer(serializers.ModelSerializer):
@@ -156,3 +162,5 @@ class ForecastDeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Forecast
         fields = ("store", "forecast_date", "sku", "sales_units_forecasted")
+
+

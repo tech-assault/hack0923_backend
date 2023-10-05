@@ -99,8 +99,6 @@ class Forecast(models.Model):
         verbose_name="Единица складского учета"
     )
     forecast_date = models.DateField("Дата расчета прогноза")
-    date = models.DateField("Дата")
-    sales_units_forecasted = models.PositiveIntegerField("Спрос в ШТ")
 
     class Meta:
         verbose_name = "Прогноз"
@@ -108,8 +106,22 @@ class Forecast(models.Model):
 
         constraints = [
             models.UniqueConstraint(
-                fields=('store', 'sku', 'forecast_date', 'date'),
-                name='unique_store_sku_fore_date_date_in_forecast'
+                fields=('store', 'sku', 'forecast_date',),
+                name='unique_store_sku_fore_date_in_forecast'
             )
         ]
 
+    def __str__(self):
+        return f'{self.store_id} {self.sku_id} {self.forecast_date}'
+
+
+class DayForecast(models.Model):
+    forecast_sku_of_store = models.ForeignKey(
+        Forecast, on_delete=models.CASCADE, verbose_name="Дата прогноза",
+        related_name='forecast')
+    date = models.DateField("Дата")
+    units = models.PositiveIntegerField("Спрос в ШТ")
+
+    class Meta:
+        verbose_name = "Прогноз дня"
+        verbose_name_plural = "Прогнозы дней"

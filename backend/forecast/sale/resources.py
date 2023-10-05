@@ -1,6 +1,6 @@
 from import_export import resources, fields, widgets
 
-from .models import Category, Sale, Store
+from .models import Category, Sale, Store, Forecast, DayForecast
 
 
 class CategoryResource(resources.ModelResource):
@@ -55,3 +55,25 @@ class StoreResource(resources.ModelResource):
     class Meta:
         import_id_fields = ('store',)
         model = Store
+
+
+class ForecastResource(resources.ModelResource):
+    store = fields.Field()
+    sku = fields.Field()
+    forecast_date = fields.Field()
+
+    class Meta:
+        model = DayForecast
+        fields = ('store', 'sku', 'forecast_date', 'date', 'units')
+
+    @staticmethod
+    def dehydrate_store(day_forecast):
+        return getattr(day_forecast.forecast_sku_of_store.store, "store")
+
+    @staticmethod
+    def sku(day_forecast):
+        return getattr(day_forecast.forecast_sku_of_store.sku, "sku")
+
+    @staticmethod
+    def dehydrate_forecast_date(day_forecast):
+        return getattr(day_forecast.forecast_sku_of_store, "forecast_date")

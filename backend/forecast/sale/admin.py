@@ -1,10 +1,10 @@
 from django.contrib import admin
-from django.forms import forms
 
 from import_export.admin import ImportExportModelAdmin
 
-from .models import Category, Forecast, Sale, Store
-from .resources import CategoryResource, StoreResource, SaleResource
+from .models import Category, DayForecast, Sale, Store
+from .resources import CategoryResource, StoreResource, SaleResource, \
+    ForecastResource
 
 
 @admin.register(Category)
@@ -33,8 +33,24 @@ class SaleAdmin(ImportExportModelAdmin):
                     'sales_units_promo', 'sales_rub', 'sales_run_promo')
 
 
-@admin.register(Forecast)
-class ForecastAdmin(admin.ModelAdmin):
+@admin.register(DayForecast)
+class ForecastAdmin(ImportExportModelAdmin):
     """Административная панель для модели Forecast."""
+    resource_class = ForecastResource
 
-    list_display = ("store", "sku", "forecast_date")
+    list_display = (
+        'get_store', 'get_sku', 'get_forecast_date', 'date', 'units')
+
+    def get_store(self, obj):
+        return obj.forecast_sku_of_store.store.store
+
+    def get_sku(self, obj):
+        return obj.forecast_sku_of_store.sku.sku
+
+    def get_forecast_date(self, obj):
+        return obj.forecast_sku_of_store.forecast_date
+
+    get_store.short_description = 'Магазин'
+    get_sku.short_description = 'Единица складского учета'
+    get_forecast_date.short_description = 'Дата расчета прогноза'
+
