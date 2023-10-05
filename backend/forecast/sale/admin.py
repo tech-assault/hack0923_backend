@@ -8,7 +8,7 @@ from django.shortcuts import render
 from import_export.admin import ImportExportModelAdmin
 
 from .models import Category, Forecast, Sale, Store, SaleOfSKUInStore
-from .resource import CategoryResource, StoreResource, SaleResource
+from .resources import CategoryResource, StoreResource, SaleResource
 from .utils import ImportUtils
 
 
