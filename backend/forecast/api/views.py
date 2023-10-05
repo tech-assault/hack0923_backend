@@ -31,7 +31,7 @@ from .utils import CustomRenderer
 )
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     """Вьюсет для модели Category."""
-    renderer_class = CustomRenderer
+    renderer_classes = (CustomRenderer,)
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -55,7 +55,7 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
 )
 class StoreViewSet(viewsets.ReadOnlyModelViewSet):
     """Вьюсет для модели Store."""
-    renderer_class = CustomRenderer
+    renderer_classes = (CustomRenderer,)
 
     queryset = Store.objects.all()
     serializer_class = StoreSerializer
@@ -83,7 +83,7 @@ class StoreViewSet(viewsets.ReadOnlyModelViewSet):
 )
 class SaleViewSet(viewsets.ReadOnlyModelViewSet):
     """Вьюсет для модели Sale."""
-    renderer_class = CustomRenderer
+    renderer_classes = (CustomRenderer,)
 
     serializer_class = SaleSerializer
     schema = AutoSchema()
@@ -133,7 +133,7 @@ class ForecastViewSet(
     Поддерживает фильтрацию прогнозов по SKU, ID магазина и дате.
 
     """
-    renderer_class = CustomRenderer
+    renderer_classes = (CustomRenderer,)
 
     schema = AutoSchema()
     filter_backends = [DjangoFilterBackend]
