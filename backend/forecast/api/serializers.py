@@ -13,6 +13,8 @@ class CategorySerializer(serializers.ModelSerializer):
 class StoreSerializer(serializers.ModelSerializer):
     """Сериализатор магазина."""
 
+    is_active = serializers.IntegerField(read_only=True)
+
     class Meta:
         model = Store
         fields = (
@@ -25,24 +27,29 @@ class StoreSerializer(serializers.ModelSerializer):
             "is_active",
         )
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['is_active'] = int(instance.is_active)
+        return representation
 
-class SaleSerializer(serializers.ModelSerializer):
-    """Сериализатор продаж."""
 
-    store = serializers.SlugRelatedField(
-        slug_field="store", queryset=Store.objects.all()
-    )
-    sku = serializers.SlugRelatedField(
-        slug_field="sku", queryset=Category.objects.all()
-    )
+class SaleFactSerializer(serializers.ModelSerializer):
+
 
     class Meta:
         model = Sale
-        fields = "__all__"
+        fields = (
+            "date",
+            "sales_type",
+            "sales_units",
+            "sales_units_promo",
+            "sales_rub",
+            "sales_run_promo",
+        )
 
 
-class ForecastSerializer(serializers.ModelSerializer):
-    """Сериализатор прогноза."""
+
+class SaleSerializer(serializers.ModelSerializer):
 
     store = serializers.SlugRelatedField(
         slug_field="store", queryset=Store.objects.all()
@@ -50,10 +57,34 @@ class ForecastSerializer(serializers.ModelSerializer):
     sku = serializers.SlugRelatedField(
         slug_field="sku", queryset=Category.objects.all()
     )
+    fact = serializers.SerializerMethodField()
+    
 
     class Meta:
-        model = Forecast
-        fields = ("store", "forecast_date", "sku", "sales_units_forecasted")
+        model = Sale
+        fields = (
+            "store",
+            "sku",
+            "fact",
+        )
+
+    def get_fact(self, obj):
+        sales = Sale.objects.filter(store=obj.store, sku=obj.sku)
+        fact_data = []
+
+        for sale in sales:
+            fact_data.append({
+                "date": sale.date,
+                "sales_type": int(sale.sales_type),
+                "sales_units": sale.sales_units,
+                "sales_units_promo": sale.sales_units_promo,
+                "sales_rub": sale.sales_rub,
+                "sales_run_promo": sale.sales_run_promo,
+            })
+
+        return fact_data
+
+
 
 
 class CategoryDeSerializer(serializers.ModelSerializer):
@@ -135,6 +166,9 @@ class SaleDeSerializer(serializers.ModelSerializer):
             "sales_run_promo",
         )
 
+class SalesUnitsSerializer(serializers.Serializer):
+    date = serializers.DateField()
+    sales_units = serializers.IntegerField()
 
 class ForecastDeSerializer(serializers.ModelSerializer):
     """
@@ -155,3 +189,25 @@ class ForecastDeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Forecast
         fields = ("store", "forecast_date", "sku", "sales_units_forecasted")
+
+    
+class ForecastSerializer(serializers.ModelSerializer):
+    """Сериализатор прогноза."""
+    store = serializers.SlugRelatedField(
+        slug_field="store", queryset=Store.objects.all()
+    )
+    sku = serializers.SlugRelatedField(
+        slug_field="sku", queryset=Category.objects.all()
+    )
+
+    class Meta:
+        model = Forecast
+        fields = ("store", "forecast_date", "sku", )
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        forecast_data = {
+            str(instance.forecast_date): instance.sales_units_forecasted
+        }
+        representation['forecast'] = forecast_data
+        return representation

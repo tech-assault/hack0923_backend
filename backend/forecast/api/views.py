@@ -1,4 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from drf_standardized_errors.openapi import AutoSchema
 from rest_framework import filters, mixins, viewsets
@@ -12,6 +13,7 @@ from .serializers import (
     SaleSerializer,
     StoreSerializer,
 )
+from . permissions import UserIsStaff
 
 
 @extend_schema(tags=["Категории"])
@@ -30,9 +32,17 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = [IsAuthenticated]
     schema = AutoSchema()
     filter_backends = [DjangoFilterBackend]
     filterset_class = CategoryFilter
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+
+        data = {"data": serializer.data}
+        return Response(data)
 
 
 @extend_schema(tags=["Магазины"])
@@ -51,12 +61,19 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
 class StoreViewSet(viewsets.ReadOnlyModelViewSet):
     """Вьюсет для модели Store."""
 
-    queryset = Store.objects.all()
     serializer_class = StoreSerializer
+    queryset = Store.objects.all()
+    #permission_classes = [UserIsStaff]
     filter_backends = [filters.SearchFilter]
     filter_backends = [DjangoFilterBackend]
     filterset_class = StoreFilter
     search_fields = ["type_format", "loc", "city", "division"]
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+        data = {"data": serializer.data}
+        return Response(data)
 
 
 @extend_schema(tags=["Sale"])
@@ -78,6 +95,7 @@ class SaleViewSet(viewsets.ReadOnlyModelViewSet):
     """Вьюсет для модели Sale."""
 
     serializer_class = SaleSerializer
+    permission_classes = [IsAuthenticated]
     schema = AutoSchema()
 
     def get_queryset(self):
@@ -85,6 +103,17 @@ class SaleViewSet(viewsets.ReadOnlyModelViewSet):
         sku = self.request.query_params.get("sku")
         store_id = self.request.query_params.get("store_id")
         return Sale.objects.filter(sku=sku, store_id=store_id)
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+        
+        data = {"data": serializer.data}
+        return Response(data)
+
+from django.db import transaction
+from rest_framework.response import Response
+from rest_framework import status
 
 
 @extend_schema(tags=["Прогнозы"])
@@ -119,15 +148,18 @@ class ForecastViewSet(
     schema = AutoSchema()
     filter_backends = [DjangoFilterBackend]
     filterset_class = ForecastFilter
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         """Возвращает набор данных прогнозов для заданных SKU и ID магазина."""
+        user = self.request.user
         sku = self.request.query_params.get("sku")
         store_id = self.request.query_params.get("store_id")
-        return Forecast.objects.filter(pr_sku_id=sku, st_id=store_id)
+        return Forecast.objects.filter(sku=sku, store=store_id, store__in=user.stores.all())
 
     def get_serializer_class(self):
         """Функция определяющая сериализатор в зависимости от метода."""
         if self.action == "list":
             return ForecastSerializer
         return ForecastDeSerializer
+
