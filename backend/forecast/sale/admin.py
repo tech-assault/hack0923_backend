@@ -1,19 +1,10 @@
-import json
-
 from django.contrib import admin
 from django.forms import forms
-from django.http import HttpResponse
-from django.shortcuts import render
 
 from import_export.admin import ImportExportModelAdmin
 
-from .models import Category, Forecast, Sale, Store, SaleOfSKUInStore
-from .resource import CategoryResource, StoreResource, SaleResource
-from .utils import ImportUtils
-
-
-class CsvImportForm(forms.Form):
-    csv_file = forms.FileField()
+from .models import Category, Forecast, Sale, Store
+from .resources import CategoryResource, StoreResource, SaleResource
 
 
 @admin.register(Category)
@@ -38,7 +29,8 @@ class SaleAdmin(ImportExportModelAdmin):
     """Административная панель для модели Sale."""
     resource_class = SaleResource
 
-    list_display = ("store", "sku")
+    list_display = ('store', 'sku', 'date', 'sales_type', 'sales_units',
+                    'sales_units_promo', 'sales_rub', 'sales_run_promo')
 
 
 @admin.register(Forecast)
