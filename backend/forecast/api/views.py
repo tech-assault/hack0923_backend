@@ -1,20 +1,17 @@
+from django.db import IntegrityError
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import (OpenApiParameter, extend_schema,
                                    extend_schema_view)
 from drf_standardized_errors.openapi import AutoSchema
-from rest_framework import filters, mixins, viewsets
+from rest_framework import filters, mixins, viewsets, status
 from rest_framework.response import Response
 
 from sale.models import Category, Forecast, Sale, Store
 
 from .filters import CategoryFilter, ForecastFilter, StoreFilter
-from .serializers import (
-    CategorySerializer,
-    ForecastDeSerializer,
-    ForecastSerializer,
-    SaleSerializer,
-    StoreSerializer,
-)
+from .serializers import (CategorySerializer, ForecastSerializer,
+                          StoreSerializer, SaleListSerializer,
+                          SaleRetrieveSerializer)
 from .utils import CustomRenderer
 
 
@@ -70,8 +67,6 @@ class StoreViewSet(viewsets.ReadOnlyModelViewSet):
         summary="Получить список продаж",
         description="Возвращает список продаж для заданного SKU и ID магазина.",
         parameters=[
-            OpenApiParameter(name="sku", description="SKU товара",
-                             required=True),
             OpenApiParameter(name="store", description="ID магазина",
                              required=True),
         ],
@@ -79,26 +74,52 @@ class StoreViewSet(viewsets.ReadOnlyModelViewSet):
     retrieve=extend_schema(
         summary="Получить детали продажи",
         description="Возвращает детали продажи для заданного ID.",
+        parameters=[
+            OpenApiParameter(name="sku", description="SKU товара",
+                             required=True),
+            OpenApiParameter(name="store", description="ID магазина",
+                             required=True),
+        ],
     ),
 )
 class SaleViewSet(viewsets.ReadOnlyModelViewSet):
     """Вьюсет для модели Sale."""
     renderer_classes = (CustomRenderer,)
 
-    serializer_class = SaleSerializer
     schema = AutoSchema()
 
     def get_queryset(self):
         """Возвращает набор данных продаж для заданного SKU и ID магазина."""
         return Sale.objects.filter(
-            sku=self.request.query_params.get("sku"),
             store_id=self.request.query_params.get("store"))
 
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return SaleListSerializer
+        return SaleRetrieveSerializer
+
     def list(self, request, *args, **kwargs):
+        result = []
+        sku_indexs = {}
+        store = self.request.query_params.get('store')
+        for purchase in self.get_serializer(
+                self.get_queryset(), many=True).data:
+            sku = purchase.pop('sku')
+            if sku not in sku_indexs:
+                sku_indexs[sku] = len(result)
+                result.append({'store': store, 'sku': sku, 'fact': [purchase]})
+            else:
+                result[sku_indexs[sku]]['fact'].append(purchase)
+
+        return Response(result)
+
+    def retrieve(self, request, *args, **kwargs):
+        queryset = self.get_queryset().filter(
+            sku_id=self.request.query_params.get("sku"))
         return Response({'store': self.request.query_params.get('store'),
                          'sku': self.request.query_params.get('sku'),
                          'fact': self.get_serializer(
-                             self.get_queryset(), many=True).data})
+                             queryset, many=True).data})
 
 
 @extend_schema(tags=["Прогнозы"])
@@ -134,7 +155,7 @@ class ForecastViewSet(
 
     """
     renderer_classes = (CustomRenderer,)
-
+    serializer_class = ForecastSerializer
     schema = AutoSchema()
     filter_backends = [DjangoFilterBackend]
     filterset_class = ForecastFilter
@@ -145,8 +166,19 @@ class ForecastViewSet(
         store = self.request.query_params.get("store")
         return Forecast.objects.filter(sku_id=sku, store_id=store)
 
-    def get_serializer_class(self):
-        """Функция определяющая сериализатор в зависимости от метода."""
-        if self.action == "list":
-            return ForecastSerializer
-        return ForecastDeSerializer
+    def create(self, request, *args, **kwargs):
+        data = request.data.get('data')
+        result = []
+        try:
+            for forecast in data:
+                serializer = self.get_serializer(data=forecast)
+                serializer.is_valid(raise_exception=True)
+                self.perform_create(serializer)
+                result.append(serializer.data)
+        except IntegrityError as error_message:
+            return Response({'error': str(error_message)},
+                            status=status.HTTP_409_CONFLICT)
+
+        headers = self.get_success_headers(result)
+        return Response(result, status=status.HTTP_201_CREATED,
+                        headers=headers)

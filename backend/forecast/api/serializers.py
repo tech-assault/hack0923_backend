@@ -27,7 +27,7 @@ class StoreSerializer(serializers.ModelSerializer):
         )
 
 
-class SaleSerializer(serializers.ModelSerializer):
+class SaleRetrieveSerializer(serializers.ModelSerializer):
     """Сериализатор продаж."""
 
     class Meta:
@@ -35,8 +35,15 @@ class SaleSerializer(serializers.ModelSerializer):
         exclude = ('id', 'store', 'sku')
 
 
-class DayForecastSerializer(serializers.ModelSerializer):
+class SaleListSerializer(serializers.ModelSerializer):
+    """Сериализатор продаж."""
 
+    class Meta:
+        model = Sale
+        exclude = ('id', 'store',)
+
+
+class DayForecastSerializer(serializers.ModelSerializer):
     class Meta:
         model = DayForecast
         fields = ('date', 'units')
@@ -61,6 +68,28 @@ class ForecastSerializer(serializers.ModelSerializer):
         forecast = super().to_representation(instance)
         forecast['forecast'] = {day_forecast['date']: day_forecast['units']
                                 for day_forecast in forecast['forecast']}
+        return forecast
+
+    def to_internal_value(self, data):
+        data['forecast'] = [
+            {'date': date, 'units': units}
+            for date, units in data['forecast'].items()]
+        return data
+
+    @staticmethod
+    def set_days_forecast(instance, days_forecast):
+        instance.forecast.bulk_create([
+            DayForecast(forecast_sku_of_store=instance, **day_forecast)
+            for day_forecast in days_forecast])
+
+    def create(self, validated_data):
+        days_forecast = validated_data.pop('forecast')
+        forecast = Forecast.objects.create(
+            store_id=validated_data['store'], sku_id=validated_data['sku'],
+            forecast_date=validated_data['forecast_date'])
+
+        self.set_days_forecast(forecast, days_forecast)
+
         return forecast
 
 
@@ -126,7 +155,8 @@ class SaleDeSerializer(serializers.ModelSerializer):
     date = serializers.DateField()
     sales_type = serializers.IntegerField(source="pr_sales_type_id")
     sales_units = serializers.IntegerField(source="pr_sales_in_units")
-    sales_units_promo = serializers.IntegerField(source="pr_promo_sales_in_units")
+    sales_units_promo = serializers.IntegerField(
+        source="pr_promo_sales_in_units")
     sales_rub = serializers.FloatField(source="pr_sales_in_rub")
     sales_run_promo = serializers.FloatField(source="pr_promo_sales_in_rub")
 
@@ -142,24 +172,3 @@ class SaleDeSerializer(serializers.ModelSerializer):
             "sales_rub",
             "sales_run_promo",
         )
-
-
-class ForecastDeSerializer(serializers.ModelSerializer):
-    """
-    Сериализатор для модели Forecast.
-
-    Используется только для получения данных.
-    """
-
-    store = serializers.SlugRelatedField(
-        slug_field="store", source="st_id", queryset=Store.objects.all()
-    )
-    forecast_date = serializers.DateField()
-    sku = serializers.SlugRelatedField(
-        slug_field="sku", source="pr_sku_id", queryset=Category.objects.all()
-    )
-    sales_units_forecasted = serializers.IntegerField(source="target")
-
-    class Meta:
-        model = Forecast
-        fields = ("store", "forecast_date", "sku", "sales_units_forecasted")
