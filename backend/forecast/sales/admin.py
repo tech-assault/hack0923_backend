@@ -24,6 +24,13 @@ class StoreAdmin(admin.ModelAdmin):
         "is_active",
     ]
 
+    def get_queryset(self, request):
+        """Ограничивает доступ только к магазинам, которые принадлежат пользователю."""
+        qs = super().get_queryset(request)
+        if request.user.groups.filter(name='Пользователи').exists():            
+            return qs.filter(users=request.user)
+        return qs
+
 
 @admin.register(Sale)
 class SaleAdmin(admin.ModelAdmin):
