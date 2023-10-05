@@ -29,12 +29,27 @@ class StoreSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation['is_active'] = int(instance.is_active)  # Преобразовываем bool в int
+        representation['is_active'] = int(instance.is_active)
         return representation
 
 
+class SaleFactSerializer(serializers.ModelSerializer):
+
+
+    class Meta:
+        model = Sale
+        fields = (
+            "date",
+            "sales_type",
+            "sales_units",
+            "sales_units_promo",
+            "sales_rub",
+            "sales_run_promo",
+        )
+
+
+
 class SaleSerializer(serializers.ModelSerializer):
-    """Сериализатор продаж."""
 
     store = serializers.SlugRelatedField(
         slug_field="store", queryset=Store.objects.all()
@@ -42,10 +57,33 @@ class SaleSerializer(serializers.ModelSerializer):
     sku = serializers.SlugRelatedField(
         slug_field="sku", queryset=Category.objects.all()
     )
+    fact = serializers.SerializerMethodField()
+    
 
     class Meta:
         model = Sale
-        fields = "__all__"
+        fields = (
+            "store",
+            "sku",
+            "fact",
+        )
+
+    def get_fact(self, obj):
+        sales = Sale.objects.filter(store=obj.store, sku=obj.sku)
+        fact_data = []
+
+        for sale in sales:
+            fact_data.append({
+                "date": sale.date,
+                "sales_type": int(sale.sales_type),
+                "sales_units": sale.sales_units,
+                "sales_units_promo": sale.sales_units_promo,
+                "sales_rub": sale.sales_rub,
+                "sales_run_promo": sale.sales_run_promo,
+            })
+
+        return fact_data
+
 
 
 

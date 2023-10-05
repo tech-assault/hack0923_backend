@@ -37,6 +37,13 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = CategoryFilter
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+
+        data = {"data": serializer.data}
+        return Response(data)
+
 
 @extend_schema(tags=["Магазины"])
 @extend_schema_view(
@@ -96,6 +103,13 @@ class SaleViewSet(viewsets.ReadOnlyModelViewSet):
         sku = self.request.query_params.get("sku")
         store_id = self.request.query_params.get("store_id")
         return Sale.objects.filter(sku=sku, store_id=store_id)
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+        
+        data = {"data": serializer.data}
+        return Response(data)
 
 from django.db import transaction
 from rest_framework.response import Response
