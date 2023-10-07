@@ -21,15 +21,15 @@ from .utils import CustomRenderer
         summary="Получить список категорий",
         description="Возвращает список всех категорий товаров.",
     ),
-    retrieve=extend_schema(
-        summary="Получить детали категории",
-        description="Возвращает детали конкретной категории товаров.",
-    ),
 )
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
-    """Вьюсет для модели Category."""
-    renderer_classes = (CustomRenderer,)
+    """Вьюсет для модели Category.
 
+    Позволяет просматривать информацию о категориях.
+    Поддерживает фильтрацию данных по заданным критериям.
+    """
+
+    renderer_classes = (CustomRenderer,)
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     schema = AutoSchema()
@@ -40,20 +40,46 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
 @extend_schema(tags=["Магазины"])
 @extend_schema_view(
     list=extend_schema(
-        summary="Получить список магазинов",
-        description=(
-                "Возвращает список всех магазинов. " "Можно добавить фильтры по полям."
-        ),
-    ),
-    retrieve=extend_schema(
-        summary="Получить детали магазина",
-        description="Возвращает детали конкретного магазина.",
+        summary="Список магазинов",
+        description="Возвращает список магазинов с возможностью фильтрации и поиска.",
+        parameters=[
+            OpenApiParameter(
+                name="type_format",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                description="Формат магазина для фильтрации.",
+            ),
+            OpenApiParameter(
+                name="loc",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                description="Тип локации магазина для фильтрации и поиска.",
+            ),
+            OpenApiParameter(
+                name="city",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                description="Город магазина для фильтрации и поиска.",
+            ),
+            OpenApiParameter(
+                name="division",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                description="Подразделение магазина для фильтрации и поиска.",
+            ),
+        ],
+        responses={200: StoreSerializer(many=True)},
     ),
 )
 class StoreViewSet(viewsets.ReadOnlyModelViewSet):
-    """Вьюсет для модели Store."""
+    """
+    Вьюсет для модели Store.
+    
+    Позволяет просматривать информацию о магазинах.
+    Поддерживает фильтрацию и поиск по формату, локации, городу и подразделению.
+    """
+    
     renderer_classes = (CustomRenderer,)
-
     queryset = Store.objects.all()
     serializer_class = StoreSerializer
     filter_backends = (filters.SearchFilter, DjangoFilterBackend)
@@ -64,28 +90,42 @@ class StoreViewSet(viewsets.ReadOnlyModelViewSet):
 @extend_schema(tags=["Sale"])
 @extend_schema_view(
     list=extend_schema(
-        summary="Получить список продаж",
-        description="Возвращает список продаж для заданного SKU и ID магазина.",
+        summary="Список продаж",
+        description="Возвращает список продаж сгруппированных по SKU.",
         parameters=[
-            OpenApiParameter(name="store", description="ID магазина",
-                             required=True),
+            OpenApiParameter(
+                name="store",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                description="ID магазина для фильтрации продаж.",
+            ),
         ],
+        responses={200: SaleListSerializer(many=True)},
     ),
     retrieve=extend_schema(
-        summary="Получить детали продажи",
-        description="Возвращает детали продажи для заданного ID.",
+        summary="Информация о продажах",
+        description="Возвращает данные о продажах для заданного SKU и ID магазина.",
         parameters=[
-            OpenApiParameter(name="sku", description="SKU товара",
-                             required=True),
-            OpenApiParameter(name="store", description="ID магазина",
-                             required=True),
+            OpenApiParameter(
+                name="store",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                description="ID магазина для фильтрации продаж.",
+            ),
+            OpenApiParameter(
+                name="sku",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                description="SKU товара для фильтрации продаж.",
+            ),
         ],
+        responses={200: SaleRetrieveSerializer(many=True)},
     ),
 )
 class SaleViewSet(viewsets.ReadOnlyModelViewSet):
     """Вьюсет для модели Sale."""
-    renderer_classes = (CustomRenderer,)
 
+    renderer_classes = (CustomRenderer,)
     schema = AutoSchema()
 
     def get_queryset(self):
@@ -94,11 +134,28 @@ class SaleViewSet(viewsets.ReadOnlyModelViewSet):
             store_id=self.request.query_params.get("store"))
 
     def get_serializer_class(self):
+        """
+        Возвращает класс сериализатора в зависимости от выполняемого действия.
+
+        Returns:
+            type: Класс сериализатора для текущего действия.
+        """
         if self.action == 'list':
             return SaleListSerializer
         return SaleRetrieveSerializer
 
     def list(self, request, *args, **kwargs):
+        """
+        Возвращает список продаж сгруппированных по SKU.
+
+        Args:
+            request (Request): HTTP-запрос.
+            *args: Дополнительные аргументы.
+            **kwargs: Дополнительные ключевые аргументы.
+
+        Returns:
+            Response: HTTP-ответ с данными о продажах, сгруппированными по SKU.
+        """
         result = []
         sku_indexs = {}
         store = self.request.query_params.get('store')
@@ -114,6 +171,17 @@ class SaleViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(result)
 
     def retrieve(self, request, *args, **kwargs):
+        """
+        Возвращает данные о продажах для заданного SKU и ID магазина.
+
+        Args:
+            request (Request): HTTP-запрос.
+            *args: Дополнительные аргументы.
+            **kwargs: Дополнительные ключевые аргументы.
+
+        Returns:
+            Response: HTTP-ответ с данными о продажах для заданного SKU и ID магазина.
+        """
         queryset = self.get_queryset().filter(
             sku_id=self.request.query_params.get("sku"))
         return Response({'store': self.request.query_params.get('store'),
@@ -124,24 +192,30 @@ class SaleViewSet(viewsets.ReadOnlyModelViewSet):
 
 @extend_schema(tags=["Прогнозы"])
 @extend_schema_view(
-    list=extend_schema(
-        summary="Получить список прогнозов",
-        description=(
-                "Возвращает список прогнозов для заданных SKU и ID магазина."),
-        parameters=[
-            OpenApiParameter(name="sku", description="SKU товара",
-                             required=True),
-            OpenApiParameter(name="store", description="ID магазина",
-                             required=True),
-        ],
-    ),
     create=extend_schema(
-        summary="Создать новый прогноз",
-        description=(
-                "Принимает спрогнозированные значения для товара и ТЦ," " сохраняет в БД"
-        ),
+        summary="Создать прогноз",
+        description="Создает новый прогноз на основе предоставленных данных.",
         request=ForecastSerializer,
-        responses={201: ForecastSerializer},
+        responses={201: ForecastSerializer(many=True)},
+    ),
+    list=extend_schema(
+        summary="Список прогнозов",
+        description="Возвращает список прогнозов с возможностью фильтрации по SKU и ID магазина.",
+        parameters=[
+            OpenApiParameter(
+                name="sku",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                description="SKU товара для фильтрации прогнозов.",
+            ),
+            OpenApiParameter(
+                name="store",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                description="ID магазина для фильтрации прогнозов.",
+            ),
+        ],
+        responses={200: ForecastSerializer(many=True)},
     ),
 )
 class ForecastViewSet(
@@ -152,8 +226,8 @@ class ForecastViewSet(
 
     Позволяет создавать и просматривать прогнозы.
     Поддерживает фильтрацию прогнозов по SKU, ID магазина и дате.
-
     """
+
     renderer_classes = (CustomRenderer,)
     serializer_class = ForecastSerializer
     schema = AutoSchema()
@@ -161,12 +235,28 @@ class ForecastViewSet(
     filterset_class = ForecastFilter
 
     def get_queryset(self):
-        """Возвращает набор данных прогнозов для заданных SKU и ID магазина."""
+        """
+        Возвращает набор данных прогнозов для заданных SKU и ID магазина.
+
+        Returns:
+            QuerySet: Набор данных прогнозов, соответствующих заданным SKU и ID магазина.
+        """
         sku = self.request.query_params.get("sku")
         store = self.request.query_params.get("store")
         return Forecast.objects.filter(sku_id=sku, store_id=store)
 
     def create(self, request, *args, **kwargs):
+        """
+        Создает новые прогнозы на основе предоставленных данных.
+
+        Args:
+            request (Request): HTTP-запрос.
+            *args: Дополнительные аргументы.
+            **kwargs: Дополнительные ключевые аргументы.
+
+        Returns:
+            Response: HTTP-ответ с созданными прогнозами или сообщением об ошибке.
+        """
         data = request.data.get('data')
         result = []
         try:

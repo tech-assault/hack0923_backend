@@ -65,12 +65,30 @@ class ForecastSerializer(serializers.ModelSerializer):
         fields = ("store", "sku", "forecast_date", "forecast")
 
     def to_representation(self, instance):
-        forecast = super().to_representation(instance)
+        """
+        Преобразует объект прогноза в формат для представления.
+
+        Args:
+            instance: Объект прогноза.
+
+        Returns:
+            dict: Сериализованный прогноз в нужном формате.
+        """
+        forecast = super().to_representation(instance)    
         forecast['forecast'] = {day_forecast['date']: day_forecast['units']
                                 for day_forecast in forecast['forecast']}
         return forecast
 
     def to_internal_value(self, data):
+        """
+        Преобразует данные внутреннего представления.
+
+        Args:
+            data: Входные данные.
+
+        Returns:
+            dict: Преобразованные внутренние данные.
+        """
         data['forecast'] = [
             {'date': date, 'units': units}
             for date, units in data['forecast'].items()]
@@ -83,6 +101,15 @@ class ForecastSerializer(serializers.ModelSerializer):
             for day_forecast in days_forecast])
 
     def create(self, validated_data):
+        """
+        Создает новый объект прогноза.
+
+        Args:
+            validated_data (dict): Валидированные данные для создания объекта.
+
+        Returns:
+            Forecast: Созданный объект прогноза.
+        """
         days_forecast = validated_data.pop('forecast')
         forecast = Forecast.objects.create(
             store_id=validated_data['store'], sku_id=validated_data['sku'],
