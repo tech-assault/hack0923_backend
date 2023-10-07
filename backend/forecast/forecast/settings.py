@@ -81,8 +81,7 @@ WSGI_APPLICATION = "forecast.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": os.getenv("DB_ENGINE",
-                            default="django.db.backends.postgresql"),
+        "ENGINE": os.getenv("DB_ENGINE", default="django.db.backends.postgresql"),
         "NAME": os.getenv("DB_NAME", default="postgres"),
         "USER": os.getenv("POSTGRES_USER", default="postgres"),
         "PASSWORD": os.getenv("POSTGRES_PASSWORD", default="postgres"),
@@ -100,14 +99,15 @@ DATABASES = {
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": ("django.contrib.auth.password_validation"
-              ".UserAttributeSimilarityValidator")},
-    {"NAME": ("django.contrib.auth.password_validation"
-              ".MinimumLengthValidator")},
-    {"NAME": ("django.contrib.auth.password_validation"
-              ".CommonPasswordValidator")},
-    {"NAME": ("django.contrib.auth.password_validation"
-              ".NumericPasswordValidator")},
+    {
+        "NAME": (
+            "django.contrib.auth.password_validation"
+            ".UserAttributeSimilarityValidator"
+        )
+    },
+    {"NAME": ("django.contrib.auth.password_validation" ".MinimumLengthValidator")},
+    {"NAME": ("django.contrib.auth.password_validation" ".CommonPasswordValidator")},
+    {"NAME": ("django.contrib.auth.password_validation" ".NumericPasswordValidator")},
 ]
 
 # Internationalization
@@ -125,7 +125,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "/static/"
-STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -135,20 +135,18 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 REST_FRAMEWORK = {
     "EXCEPTION_HANDLER": "drf_standardized_errors.handler.exception_handler",
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    'COERCE_DECIMAL_TO_STRING': False,
+    "COERCE_DECIMAL_TO_STRING": False,
 }
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "LentaTimeSeries API",
     "DESCRIPTION": "API для прогнозирования спроса для товаров собственного производства"
-                   "с ежедневным обновлением. Он позволяет создавать, просматривать прогнозы.",
+    "с ежедневным обновлением. Он позволяет создавать, просматривать прогнозы.",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
     "SWAGGER_UI_DIST": "SIDECAR",
     "SWAGGER_UI_FAVICON_HREF": "SIDECAR",
     "REDOC_DIST": "SIDECAR",
 }
-
-MAX_LENGTH_FOR_FIELDS = 32
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 1024
