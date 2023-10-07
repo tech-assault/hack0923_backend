@@ -35,19 +35,19 @@ docker-compose up
 Выполнить миграции
 
 ```
-docker-compose exec backend python manage.py migrate
+docker-compose exec web python manage.py migrate
 ```
 
 Создать суперпользователя
 
 ```
-docker-compose exec backend python manage.py createsuperuser
+docker-compose exec web python manage.py createsuperuser
 ```
 
 Собрать статику
 
 ```
-docker-compose exec backend python manage.py collectstatic --no-input
+docker-compose exec web python manage.py collectstatic --no-input
 ```
 
 

@@ -19,12 +19,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-g4$(@)6^!+t1nk8*byfvp_@f0e&*&d)b=w$5-lqht0qs!#2i4t"
+SECRET_KEY = os.getenv(
+    'SECRET_KEY',
+    default='django-insecure-g4$(@)6^!+t1nk8*byfvp_@f0e&*&d)b=w$5-lqht0qs!#2i4t')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = True if os.getenv('DEBUG', default='True') == 'True' else False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -35,6 +37,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    'corsheaders',
     "sale.apps.SaleConfig",
     "api.apps.ApiConfig",
     "drf_standardized_errors",
@@ -47,6 +50,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    'corsheaders.middleware.CorsMiddleware',
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -89,7 +93,7 @@ DATABASES = {
         "HOST": os.getenv("DB_HOST", default="localhost"),
         "PORT": os.getenv("DB_PORT", default="5432"),
     }
-    if not DEBUG
+    if (False if os.getenv('USE_SQLITE', default='True') == 'True' else True)
     else {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
@@ -151,4 +155,7 @@ SPECTACULAR_SETTINGS = {
 
 MAX_LENGTH_FOR_FIELDS = 32
 
-DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 1024
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_URLS_REGEX = r'^.*$'
+CSRF_TRUSTED_ORIGINS = ['http://localhost']

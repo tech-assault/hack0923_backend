@@ -1,11 +1,11 @@
-FROM python:3.7-slim
+FROM python:3.10-slim
 
 WORKDIR /app
 
-COPY requirements.txt .
+COPY requirements_for_work.txt .
 
-RUN pip3 install -r requirements.txt --no-cache-dir
+RUN pip3 install -r requirements_for_work.txt --no-cache-dir
 
-COPY ./demand_oracle/ .
+COPY ./forecast/ .
 
- CMD ["gunicorn", "demand_oracle.wsgi:application", "--bind", "0:8000"]
+ CMD ["gunicorn", "forecast.wsgi:application", "--bind", "0:8000"]
