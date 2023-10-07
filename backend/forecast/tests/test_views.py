@@ -4,6 +4,7 @@ import unittest  # noqa
 from datetime import date
 
 from django.test import TestCase
+from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 from sale.models import Category, Sale, Store
@@ -218,7 +219,7 @@ class StoreAPITestCase(TestCase):
         self.assertEqual(len(response.data), 0)
 
 
-class SaleViewSetTestCase(TestCase):
+class SaleViewAPITestCase(TestCase):
     """Тестирование SaleViewSet."""
 
     def setUp(self):
@@ -287,3 +288,65 @@ class SaleViewSetTestCase(TestCase):
         self.assertEqual(
             response.data, {"store": "InvalidStore", "sku": "InvalidSKU", "fact": []}
         )
+
+
+class ForecastAPITestCase(TestCase):
+    """Тестирование ForecastViewSet."""
+
+    def setUp(self):
+        """Создание клиента API и тестовых данных категорий."""
+        self.client = APIClient()
+        self.store = Store.objects.create(store="TestStore", city="TestCity")
+        self.category = Category.objects.create(sku="TestSKU", group="TestGroup")
+
+    def test_filter_forecast_by_store(self):
+        """
+        Act: Попытка фильтрации прогнозов по магазину.
+
+        Assert:
+        - Проверка статуса ответа (HTTP 200 OK).
+        """
+        url = reverse("forecast-list")
+        response = self.client.get(url, {"store": "TestStore"})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_filter_forecast_by_invalid_store(self):
+        """
+        Act: Попытка фильтрации прогнозов по неправильному магазину.
+
+        Assert:
+        - Проверка статуса ответа (HTTP 200 OK).
+        - Проверка количества полученных данных (должно быть 0).
+        """
+        url = reverse("forecast-list")
+        response = self.client.get(url, {"store": "NonExistentStore"})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 0)
+
+    def test_filter_forecast_by_sku(self):
+        """
+        Act: Попытка фильтрации прогнозов по SKU.
+
+        Assert:
+        - Проверка статуса ответа (HTTP 200 OK).
+        """
+        url = reverse("forecast-list")
+        response = self.client.get(url, {"sku": "TestSKU"})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_filter_forecast_by_invalid_sku(self):
+        """
+        Act: Попытка фильтрации прогнозов по неправильному SKU.
+
+        Assert:
+        - Проверка статуса ответа (HTTP 200 OK).
+        - Проверка количества полученных данных (должно быть 0).
+        """
+        url = reverse("forecast-list")
+        response = self.client.get(url, {"sku": "NonExistentSKU"})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 0)
