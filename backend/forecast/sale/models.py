@@ -2,11 +2,11 @@ from decimal import Decimal
 
 from django.core.validators import MinValueValidator
 from django.db import models
-from forecast.settings import MAX_LENGTH_FOR_FIELDS
+
+from .constants import MAX_DIGITS, DECIMAL_PLACES, MAX_LENGTH_FOR_FIELDS
+
 
 DECIMAL_VALIDATION = [MinValueValidator(Decimal('0.1'))]
-MAX_DIGITS = 15
-DECIMAL_PLACES = 1
 
 
 class Category(models.Model):
@@ -116,6 +116,8 @@ class Forecast(models.Model):
 
 
 class DayForecast(models.Model):
+    """Модель прогнозов дней."""
+
     forecast_sku_of_store = models.ForeignKey(
         Forecast, on_delete=models.CASCADE, verbose_name="Дата прогноза",
         related_name='forecast')
