@@ -44,6 +44,9 @@ class SaleListSerializer(serializers.ModelSerializer):
 
 
 class DayForecastSerializer(serializers.ModelSerializer):
+    """Сериализатор для модели DayForecast."""
+
+    
     class Meta:
         model = DayForecast
         fields = ('date', 'units')
