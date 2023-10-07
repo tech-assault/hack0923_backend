@@ -102,16 +102,7 @@ class ForecastSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def set_days_forecast(instance, days_forecast):
-        """
-        Создает и связывает прогнозы дней с объектом прогноза продаж.
-
-        Args:
-            instance (Forecast): Объект прогноза продаж.
-            days_forecast (list): Список данных о прогнозах дней.
-
-        Returns:
-            None
-        """
+        """Создает и связывает прогнозы дней с объектом прогноза продаж."""
         instance.forecast.bulk_create(
             [
                 DayForecast(forecast_sku_of_store=instance, **day_forecast)
