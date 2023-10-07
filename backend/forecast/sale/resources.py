@@ -1,6 +1,6 @@
 from import_export import resources, fields, widgets
 
-from .models import Category, Sale, Store, Forecast, DayForecast
+from .models import Category, Sale, Store, DayForecast, SaleOfSkuInStore
 
 
 class CategoryResource(resources.ModelResource):
@@ -34,11 +34,27 @@ class SaleResource(resources.ModelResource):
                              column_name='pr_sales_in_rub')
     sales_run_promo = fields.Field(attribute='sales_run_promo',
                                    column_name='pr_promo_sales_in_rub')
+    sku_of_store = fields.Field(attribute='sku_of_store_id',
+                                widget=widgets.ForeignKeyWidget(
+                                    Sale, field='id'))
 
     class Meta:
         exclude = ('id',)
         import_id_fields = ('store', 'sku', 'date')
-        model = Sale
+        model = SaleOfSkuInStore
+        export_order = ('sku_of_store_id',)
+
+    def before_import_row(self, row, **kwargs):
+        store = row.pop(self.fields.get('store').column_name)
+        sku = row.pop(self.fields.get('sku').column_name)
+        sku_of_store_id = Sale.objects.get_or_create(
+            store_id=store, sku_id=sku)[0].id
+
+        row['sku_of_store_id'] = sku_of_store_id
+
+    # def before_save_instance(self, instance, using_transactions, dry_run):
+    #     x = instance
+    #     instance.sku_of_store_id = 0
 
 
 class StoreResource(resources.ModelResource):

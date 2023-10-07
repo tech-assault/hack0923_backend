@@ -58,6 +58,26 @@ class Sale(models.Model):
     sku = models.ForeignKey(
         Category, on_delete=models.CASCADE,
         verbose_name="Единица складского учета")
+
+    class Meta:
+        verbose_name = "Продажа"
+        verbose_name_plural = "Продажи"
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=('store', 'sku'),
+                name='unique_store_sku_in_sale'
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.store} {self.sku}'
+
+
+class SaleOfSkuInStore(models.Model):
+    sku_of_store = models.ForeignKey(Sale, on_delete=models.CASCADE,
+                                     verbose_name="Товар магазина",
+                                     related_name='forecast')
     date = models.DateField("Дата")
     sales_type = models.BooleanField("Флаг наличия промо")
     sales_units = models.DecimalField(
@@ -79,13 +99,12 @@ class Sale(models.Model):
 
         constraints = [
             models.UniqueConstraint(
-                fields=('store', 'sku', 'date'),
-                name='unique_store_sku_date_in_sale'
+                fields=('sku_of_store', 'date'),
+                name='unique_sku_of_store_date_in_sale_of_sku_in_store'
             )
         ]
 
-    def __str__(self):
-        return f'{self.store} {self.sku}'
+
 
 
 class Forecast(models.Model):
@@ -106,7 +125,7 @@ class Forecast(models.Model):
 
         constraints = [
             models.UniqueConstraint(
-                fields=('store', 'sku', 'forecast_date',),
+                fields=('store', 'sku', 'forecast_date'),
                 name='unique_store_sku_fore_date_in_forecast'
             )
         ]

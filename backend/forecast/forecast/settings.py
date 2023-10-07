@@ -92,7 +92,7 @@ DATABASES = {
     if not DEBUG
     else {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "NAME": BASE_DIR / "db_new.sqlite3",
     }
 }
 

@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from import_export.admin import ImportExportModelAdmin
 
-from .models import Category, DayForecast, Sale, Store
+from .models import Category, DayForecast, Sale, Store, SaleOfSkuInStore
 from .resources import CategoryResource, StoreResource, SaleResource, \
     ForecastResource
 
@@ -24,13 +24,23 @@ class StoreAdmin(ImportExportModelAdmin):
                     "is_active")
 
 
-@admin.register(Sale)
+@admin.register(SaleOfSkuInStore)
 class SaleAdmin(ImportExportModelAdmin):
     """Административная панель для модели Sale."""
     resource_class = SaleResource
 
-    list_display = ('store', 'sku', 'date', 'sales_type', 'sales_units',
-                    'sales_units_promo', 'sales_rub', 'sales_run_promo')
+    list_display = ('get_store', 'get_sku', 'date', 'sales_type',
+                    'sales_units', 'sales_units_promo', 'sales_rub',
+                    'sales_run_promo')
+
+    def get_store(self, obj):
+        return obj.sku_of_store.store_id
+
+    def get_sku(self, obj):
+        return obj.sku_of_store.sku_id
+
+    get_store.short_description = 'Магазин'
+    get_sku.short_description = 'Единица складского учета'
 
 
 @admin.register(DayForecast)
