@@ -51,6 +51,9 @@ class Store(models.Model):
     class Meta:
         verbose_name = "Магазин"
         verbose_name_plural = "Магазины"
+        permissions = [
+            ("can_access_store", "Can access store"),
+        ]
 
 
 class Sale(models.Model):

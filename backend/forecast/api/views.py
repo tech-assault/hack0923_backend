@@ -135,31 +135,12 @@ from rest_framework import status
         responses={201: ForecastSerializer},
     ),
 )
-class ForecastViewSet(
-    mixins.CreateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet
-):
-    """
-    Вьюсет для модели Forecast.
+class ForecastViewSet(viewsets.ViewSet):
+    queryset = Forecast.objects.all()
+    serializer_class = ForecastSerializer
 
-    Позволяет создавать и просматривать прогнозы.
-    Поддерживает фильтрацию прогнозов по SKU, ID магазина и дате.
-    """
-
-    schema = AutoSchema()
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = ForecastFilter
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        """Возвращает набор данных прогнозов для заданных SKU и ID магазина."""
-        user = self.request.user
-        sku = self.request.query_params.get("sku")
-        store_id = self.request.query_params.get("store_id")
-        return Forecast.objects.filter(sku=sku, store=store_id, store__in=user.stores.all())
-
-    def get_serializer_class(self):
-        """Функция определяющая сериализатор в зависимости от метода."""
-        if self.action == "list":
-            return ForecastSerializer
-        return ForecastDeSerializer
+    def list(self, request, store, sku):
+        forecasts = self.queryset.filter(store=store, sku=sku)
+        serializer = self.serializer_class(forecasts, many=True)
+        return Response(serializer.data)
 
