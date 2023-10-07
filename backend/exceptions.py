@@ -3,11 +3,7 @@ from drf_standardized_errors.types import ErrorResponse
 
 
 class MyExceptionFormatter(ExceptionFormatter):
-    """
-    Класс для форматирования исключений.
-
-    Наследует ExceptionFormatter и переопределяет метод format_error_response.
-    """
+    """Класс для форматирования исключений."""
 
     def format_error_response(self, error_response: ErrorResponse):
         """

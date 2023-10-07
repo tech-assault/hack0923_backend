@@ -1,6 +1,5 @@
 from rest_framework import serializers
-
-from sale.models import Category, Forecast, Sale, Store, DayForecast
+from sale.models import Category, DayForecast, Forecast, Sale, Store
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -32,7 +31,7 @@ class SaleRetrieveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Sale
-        exclude = ('id', 'store', 'sku')
+        exclude = ("id", "store", "sku")
 
 
 class SaleListSerializer(serializers.ModelSerializer):
@@ -40,13 +39,18 @@ class SaleListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Sale
-        exclude = ('id', 'store',)
+        exclude = (
+            "id",
+            "store",
+        )
 
 
 class DayForecastSerializer(serializers.ModelSerializer):
+    """Сериализатор для модели DayForecast."""
+
     class Meta:
         model = DayForecast
-        fields = ('date', 'units')
+        fields = ("date", "units")
 
 
 class ForecastSerializer(serializers.ModelSerializer):
@@ -65,28 +69,63 @@ class ForecastSerializer(serializers.ModelSerializer):
         fields = ("store", "sku", "forecast_date", "forecast")
 
     def to_representation(self, instance):
+        """
+        Преобразует объект прогноза в формат для представления.
+
+        Args:
+            instance: Объект прогноза.
+
+        Returns:
+            dict: Сериализованный прогноз в нужном формате.
+        """
         forecast = super().to_representation(instance)
-        forecast['forecast'] = {day_forecast['date']: day_forecast['units']
-                                for day_forecast in forecast['forecast']}
+        forecast["forecast"] = {
+            day_forecast["date"]: day_forecast["units"]
+            for day_forecast in forecast["forecast"]
+        }
         return forecast
 
     def to_internal_value(self, data):
-        data['forecast'] = [
-            {'date': date, 'units': units}
-            for date, units in data['forecast'].items()]
+        """
+        Преобразует данные внутреннего представления.
+
+        Args:
+            data: Входные данные.
+
+        Returns:
+            dict: Преобразованные внутренние данные.
+        """
+        data["forecast"] = [
+            {"date": date, "units": units} for date, units in data["forecast"].items()
+        ]
         return data
 
     @staticmethod
     def set_days_forecast(instance, days_forecast):
-        instance.forecast.bulk_create([
-            DayForecast(forecast_sku_of_store=instance, **day_forecast)
-            for day_forecast in days_forecast])
+        """Создает и связывает прогнозы дней с объектом прогноза продаж."""
+        instance.forecast.bulk_create(
+            [
+                DayForecast(forecast_sku_of_store=instance, **day_forecast)
+                for day_forecast in days_forecast
+            ]
+        )
 
     def create(self, validated_data):
-        days_forecast = validated_data.pop('forecast')
+        """
+        Создает новый объект прогноза.
+
+        Args:
+            validated_data (dict): Валидированные данные для создания объекта.
+
+        Returns:
+            Forecast: Созданный объект прогноза.
+        """
+        days_forecast = validated_data.pop("forecast")
         forecast = Forecast.objects.create(
-            store_id=validated_data['store'], sku_id=validated_data['sku'],
-            forecast_date=validated_data['forecast_date'])
+            store_id=validated_data["store"],
+            sku_id=validated_data["sku"],
+            forecast_date=validated_data["forecast_date"],
+        )
 
         self.set_days_forecast(forecast, days_forecast)
 
@@ -155,8 +194,7 @@ class SaleDeSerializer(serializers.ModelSerializer):
     date = serializers.DateField()
     sales_type = serializers.IntegerField(source="pr_sales_type_id")
     sales_units = serializers.IntegerField(source="pr_sales_in_units")
-    sales_units_promo = serializers.IntegerField(
-        source="pr_promo_sales_in_units")
+    sales_units_promo = serializers.IntegerField(source="pr_promo_sales_in_units")
     sales_rub = serializers.FloatField(source="pr_sales_in_rub")
     sales_run_promo = serializers.FloatField(source="pr_promo_sales_in_rub")
 
