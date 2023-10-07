@@ -1,10 +1,12 @@
 import os
 import sys
+import unittest  # noqa
+from datetime import date
 
 from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
-from sale.models import Category, Store
+from sale.models import Category, Sale, Store
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CODE_DIR_PATH = os.path.join(BASE_DIR, "api")
@@ -214,3 +216,74 @@ class StoreAPITestCase(TestCase):
         response = self.client.get("/api/shops/?division=Nonexist")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 0)
+
+
+class SaleViewSetTestCase(TestCase):
+    """Тестирование SaleViewSet."""
+
+    def setUp(self):
+        """Создание клиента API и тестовых данных магазинов, категорий и продаж."""
+        self.client = APIClient()
+        self.store = Store.objects.create(store="TestStore")
+        self.category = Category.objects.create(sku="TestSKU")
+        self.sale_data = {
+            "store": self.store,
+            "sku": self.category,
+            "date": date.today(),
+            "sales_type": True,
+            "sales_units": 10,
+            "sales_units_promo": 5,
+            "sales_rub": 100.0,
+            "sales_run_promo": 50.0,
+        }
+        Sale.objects.create(**self.sale_data)
+
+    def test_list_sales(self):
+        """
+        Act: Получение списка продаж для магазина.
+
+        Assert: Проверка статуса ответа, количества полученных данных.
+        """
+        response = self.client.get("/api/sales/", {"store": self.store.store})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["store"], "TestStore")
+
+    def test_retrieve_sale(self):
+        """
+        Act: Получение деталей продажи для магазина и категории.
+
+        Assert: Проверка статуса ответа и соответствия полученных данных ожидаемым.
+        """
+        response = self.client.get(
+            f"/api/sales/{self.category.sku}/",
+            {"store": self.store.store, "sku": self.category.sku},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["store"], "TestStore")
+        self.assertEqual(response.data["sku"], "TestSKU")
+
+    def test_invalid_list_sales(self):
+        """
+        Act: Получение списка продаж для неверного магазина.
+
+        Assert: Проверка статуса ответа и отсутствия данных.
+        """
+        response = self.client.get("/api/sales/", {"store": "InvalidStore"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 0)
+
+    def test_invalid_retrieve_sale(self):
+        """
+        Act: Получение деталей продажи для неверного магазина и категории.
+
+        Assert: Проверка статуса ответа и соответствия полученных данных ожидаемым.
+        """
+        response = self.client.get(
+            "/api/sales/InvalidSKU/",
+            {"store": "InvalidStore", "sku": "InvalidSKU"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.data, {"store": "InvalidStore", "sku": "InvalidSKU", "fact": []}
+        )
