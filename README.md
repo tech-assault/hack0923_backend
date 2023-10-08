@@ -32,12 +32,6 @@ cd /infra
 docker-compose up
 ```
 
-Выполнить создания структуры базы данных
-
-```
-docker-compose exec web python manage.py makemigrations
-```
-
 Выполнить миграции
 
 ```

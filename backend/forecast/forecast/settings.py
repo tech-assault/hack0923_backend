@@ -93,7 +93,7 @@ DATABASES = {
         "HOST": os.getenv("DB_HOST", default="localhost"),
         "PORT": os.getenv("DB_PORT", default="5432"),
     }
-    if (False if os.getenv('USE_SQLITE', default='True') == 'True' else True)
+    if (False if os.getenv('USE_SQLITE', default='False') == 'True' else True)
     else {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
