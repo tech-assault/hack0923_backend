@@ -27,15 +27,16 @@ class StoreSerializer(serializers.ModelSerializer):
         )
 
 
-class SaleRetrieveSerializer(serializers.ModelSerializer):
+class SaleSerializer(serializers.ModelSerializer):
     """Сериализатор продаж."""
+    forecast = SaleInDaySerializer(many=True)
 
     class Meta:
         model = Sale
-        exclude = ('id', 'store', 'sku')
+        exclude = ('id',)
 
 
-class SaleListSerializer(serializers.ModelSerializer):
+class SaleInDaySerializer(serializers.ModelSerializer):
     """Сериализатор продаж."""
 
     class Meta:
