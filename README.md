@@ -63,7 +63,7 @@ docker-compose exec web python manage.py createsuperuser
 docker-compose exec web python manage.py collectstatic --no-input
 ```
 ### Локальный запуск проекта
-**Клонирование реппозитория**
+Клонируйте реппозиторий
 
 ```
 git clone https://github.com/tech-assault/hack0923_backend.git
