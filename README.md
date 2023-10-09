@@ -56,11 +56,9 @@ docker-compose exec web python manage.py collectstatic --no-input
 **api/docs/**
 
 #### Документация API доступна по адресам:
+
 ```sh
-http://127.0.0.1:8000/api/schema/swagger-ui/
-```
-```sh
-http://127.0.0.1:8000/api/schema/redoc/
+http://127.0.0.1:8000/api/schema/docs/
 ```
 #### Админка доступна по адресу:
 
