@@ -135,7 +135,11 @@ cd backend
     ```
     python3 manage.py runserver
     ```
+**Для запуска тестов:**
 
+  ```
+  python manage.py test
+  ```
 #### Документация API доступна по адресам:
 
 ```sh
