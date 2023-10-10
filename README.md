@@ -16,9 +16,28 @@
 ### **Стек**
 
 ![python version](https://img.shields.io/badge/Python-3.10-green)
-![django version](https://img.shields.io/badge/Django-4.1-green)
+![django version](https://img.shields.io/badge/Django-4.2-green)
 ![djangorestframework version](https://img.shields.io/badge/DRF-3.14-green)
 
+### Оглавление:
+- [Проект «Forecast»](#проект-forecast)
+    - [Технологии](#стек)
+    - [Оглавление:](#оглавление)
+    - [Описание проекта](#краткое-описание-проекта)
+    - [Запуск проекта](#как-запустить-проект)
+    - [Локальный запуск проекта](#локальный-запуск-проекта)
+      - [Запуск приложения на локальном сервере](#запуск-приложения-на-локальном-сервере)
+      - [Адрес документации API](#документация-api-доступна-по-адресам)
+      - [Адрес административной панели](#админка-доступна-по-адресу)
+    - [Установка pre-commit hooks](#установка-pre-commit-hooks)
+      - [Установка pre-commit](#установка-pre-commit)
+      - [Установка hooks](#установка-hooks)
+      - [Работа с commitizen](#работа-с-commitizen)
+  - [Команда](#команда)
+
+### Краткое описание проекта
+
+Главное задача проекта прогнозирование спроса для товаров собственного производства с ежедневным обновлением.
 
 
 ### Как запустить проект:
@@ -61,18 +80,70 @@ docker-compose exec web python manage.py createsuperuser
 ```
 docker-compose exec web python manage.py collectstatic --no-input
 ```
+### Локальный запуск проекта
+Клонируйте реппозиторий
 
+```
+git clone https://github.com/tech-assault/hack0923_backend.git
+```
 
-### Документация к API доступна по адресу
+Перейдите в папку с проектом hack0923_backend, установите виртуальное окружение.
 
-**api/docs/**
+```
+cd hack0923_backend
+```
+
+```
+python -m venv venv
+```
+и запустите виртуальное окружение:
+
+* Если у вас Linux/MacOS
+
+    ```
+    source venv/bin/activate
+    ```
+
+* Если у вас windows
+
+    ```
+    source venv/Scripts/activate
+    ```
+**Установка зависимостей**
+
+Перейдите в папку backend и установите зависимости
+  ```
+cd backend
+  ```
+  ```
+  pip install -r requirements.txt
+  ```
+
+**Применяем миграции:**
+
+  ```
+  python manage.py migrate
+  ```
+**Создаем суперпользователя:**
+
+  ```
+  python manage.py createsuperuser
+  ```
+#### Запуск приложения на локальном сервере
+
+* Если у вас windows
+    ```
+    python manage.py runserver
+    ```
+* Если у вас Linux/MacOS
+    ```
+    python3 manage.py runserver
+    ```
 
 #### Документация API доступна по адресам:
+
 ```sh
-http://127.0.0.1:8000/api/schema/swagger-ui/
-```
-```sh
-http://127.0.0.1:8000/api/schema/redoc/
+http://127.0.0.1:8000/api/schema/docs/
 ```
 #### Админка доступна по адресу:
 

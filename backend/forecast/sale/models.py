@@ -18,7 +18,7 @@ class Category(models.Model):
     category = models.CharField("Категория", max_length=MAX_LENGTH_FOR_FIELDS)
     subcategory = models.CharField("Подкатегория", max_length=MAX_LENGTH_FOR_FIELDS)
     uom = models.PositiveSmallIntegerField(
-        "Маркер, обозначающий продаётся товар на вес или в ШТ"
+        "Маркер, обозначающий продаётся товар на вес или в ШТ", default=1
     )
 
     class Meta:
@@ -37,10 +37,12 @@ class Store(models.Model):
     )
     city = models.CharField("Город", max_length=MAX_LENGTH_FOR_FIELDS)
     division = models.CharField("Дивизион", max_length=MAX_LENGTH_FOR_FIELDS)
-    type_format = models.PositiveSmallIntegerField("Формат")
-    loc = models.PositiveSmallIntegerField("Тип локации")
-    size = models.PositiveSmallIntegerField("Тип размера")
-    is_active = models.BooleanField("Флаг активного магазина на данный момент")
+    type_format = models.PositiveSmallIntegerField("Формат", default=1)
+    loc = models.PositiveSmallIntegerField("Тип локации", default=1)
+    size = models.PositiveSmallIntegerField("Тип размера", default=1)
+    is_active = models.BooleanField(
+        "Флаг активного магазина на данный момент", default=True
+    )
 
     class Meta:
         verbose_name = "Магазин"

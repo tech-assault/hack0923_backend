@@ -20,6 +20,38 @@ from .utils import CustomRenderer
     list=extend_schema(
         summary="Получить список категорий",
         description="Возвращает список всех категорий товаров.",
+        parameters=[
+            OpenApiParameter(
+                name="sku",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                description="Единица складского учета",
+            ),
+            OpenApiParameter(
+                name="group",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                description="Группа",
+            ),
+            OpenApiParameter(
+                name="category",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                description="Категория",
+            ),
+            OpenApiParameter(
+                name="subcategory",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                description="Подкатегория",
+            ),
+            OpenApiParameter(
+                name="uom",
+                type=int,
+                location=OpenApiParameter.QUERY,
+                description="Маркер, обозначающий продаётся товар на вес или в ШТ",
+            ),
+        ],
     ),
 )
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
@@ -68,6 +100,7 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
                 description="Подразделение магазина для фильтрации и поиска.",
             ),
         ],
+        request=StoreSerializer,
         responses={200: StoreSerializer(many=True)},
     ),
 )
@@ -87,7 +120,7 @@ class StoreViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ["type_format", "loc", "city", "division"]
 
 
-@extend_schema(tags=["Sale"])
+@extend_schema(tags=["Продажи"])
 @extend_schema_view(
     list=extend_schema(
         summary="Список продаж",
@@ -97,9 +130,10 @@ class StoreViewSet(viewsets.ReadOnlyModelViewSet):
                 name="store",
                 type=str,
                 location=OpenApiParameter.QUERY,
-                description="ID магазина для фильтрации продаж.",
+                description="Название магазина",
             ),
         ],
+        request=SaleListSerializer,
         responses={200: SaleListSerializer(many=True)},
     ),
     retrieve=extend_schema(
@@ -110,15 +144,16 @@ class StoreViewSet(viewsets.ReadOnlyModelViewSet):
                 name="store",
                 type=str,
                 location=OpenApiParameter.QUERY,
-                description="ID магазина для фильтрации продаж.",
+                description="ID магазина",
             ),
             OpenApiParameter(
                 name="sku",
                 type=str,
                 location=OpenApiParameter.QUERY,
-                description="SKU товара для фильтрации продаж.",
+                description="SKU товара",
             ),
         ],
+        request=SaleRetrieveSerializer,
         responses={200: SaleRetrieveSerializer(many=True)},
     ),
 )
@@ -206,13 +241,13 @@ class SaleViewSet(viewsets.ReadOnlyModelViewSet):
                 name="sku",
                 type=str,
                 location=OpenApiParameter.QUERY,
-                description="SKU товара для фильтрации прогнозов.",
+                description="Единица складского учета",
             ),
             OpenApiParameter(
                 name="store",
                 type=str,
                 location=OpenApiParameter.QUERY,
-                description="ID магазина для фильтрации прогнозов.",
+                description="Название магазина",
             ),
         ],
         responses={200: ForecastSerializer(many=True)},
@@ -272,3 +307,4 @@ class ForecastViewSet(
         headers = self.get_success_headers(result)
         return Response(result, status=status.HTTP_201_CREATED,
                         headers=headers)
+

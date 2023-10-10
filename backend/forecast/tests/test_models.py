@@ -1,7 +1,17 @@
+import os
+import sys
+import unittest  # noqa
 from decimal import Decimal
 
+from django.contrib.auth.models import User
 from django.test import TestCase
+from django.utils.timezone import now
+from sale.admin import ForecastAdmin
 from sale.models import Category, DayForecast, Forecast, Sale, Store
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CODE_DIR_PATH = os.path.join(BASE_DIR, "api")
+sys.path.append(CODE_DIR_PATH)
 
 
 class CategoryModelTestCase(TestCase):
@@ -296,3 +306,78 @@ class DayForecastModelTestCase(TestCase):
         self.assertEqual(
             self.day_forecast._meta.get_field("units").verbose_name, "Спрос в ШТ"
         )
+
+
+class ForecastAdminTestCase(TestCase):
+    """Тесты для админки ForecastAdmin."""
+
+    def setUp(self):
+        """Настройка данных для тестирования."""
+        self.admin_user = User.objects.create_user(
+            username="admin",
+            password="admin_password",
+            is_staff=True,
+            is_superuser=True,
+        )
+        self.client.login(username="admin", password="admin_password")
+        self.store = Store.objects.create(store="TestStore")
+        self.category = Category.objects.create(sku="TestSKU")
+        self.sale_data = {
+            "store": self.store,
+            "sku": self.category,
+            "date": now(),
+            "sales_type": True,
+            "sales_units": 10,
+            "sales_units_promo": 5,
+            "sales_rub": 100.0,
+            "sales_run_promo": 50.0,
+        }
+        Sale.objects.create(**self.sale_data)
+        self.forecast = Forecast.objects.create(
+            store=self.store,
+            sku=self.category,
+            forecast_date=now(),
+        )
+        self.day_forecast = DayForecast.objects.create(
+            forecast_sku_of_store=self.forecast, date=now(), units=100
+        )
+
+    def test_get_store(self):
+        """Проверяем, что метод возвращает правильное название магазина."""
+        forecast_admin = ForecastAdmin(Forecast, None)
+        store_name = forecast_admin.get_store(self.day_forecast)
+        self.assertEqual(store_name, "TestStore")
+
+    def test_get_sku(self):
+        """Проверяем, что метод возвращает правильное значение SKU."""
+        forecast_admin = ForecastAdmin(Forecast, None)
+        sku_name = forecast_admin.get_sku(self.day_forecast)
+        self.assertEqual(sku_name, "TestSKU")
+
+    def test_get_forecast_date(self):
+        """Проверяем, что метод возвращает правильное значение."""
+        forecast_admin = ForecastAdmin(Forecast, None)
+        forecast_date = forecast_admin.get_forecast_date(self.day_forecast)
+        self.assertEqual(forecast_date, self.forecast.forecast_date)
+
+    def test_list_display(self):
+        """
+        Тестирование атрибута list_display в классе ForecastAdmin.
+
+        Проверяем, что атрибут включает нужные поля.
+        """
+        forecast_admin = ForecastAdmin(Forecast, None)
+        self.assertEqual(
+            forecast_admin.list_display,
+            ("get_store", "get_sku", "get_forecast_date", "date", "units"),
+        )
+
+    def test_admin_view(self):
+        """
+        Act: Попытка доступа к административной странице для модели DayForecast.
+
+        Assert:
+        - Проверка статуса ответа (HTTP 200 OK).
+        """
+        response = self.client.get("http://127.0.0.1:8000/admin/sale/dayforecast/")
+        self.assertEqual(response.status_code, 200)
